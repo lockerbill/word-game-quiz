@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Share, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,6 +6,7 @@ import { Colors, Spacing, BorderRadius, GameModeConfig } from '../../src/theme/t
 import { useGameStore } from '../../src/store/gameStore';
 import { useUserStore } from '../../src/store/userStore';
 import { getLetterMultiplier } from '../../src/data/letterWeights';
+import { getAnswersForCategory } from '../../src/data/answers';
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function ResultsScreen() {
   const scoreAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const recorded = useRef(false);
+  const [showAnswers, setShowAnswers] = useState(false);
 
   useEffect(() => {
     if (!session?.score || recorded.current) return;
@@ -140,6 +142,10 @@ export default function ResultsScreen() {
             const v = session.validations[cat.id];
             const answer = session.answers[cat.id] || '';
             const valid = v?.valid;
+            const isWrong = !valid;
+            const exampleAnswers = isWrong && showAnswers
+              ? getAnswersForCategory(cat.name, session.letter).slice(0, 3)
+              : [];
             return (
               <View key={cat.id} style={styles.breakdownRow}>
                 <Text style={styles.brkEmoji}>{cat.emoji}</Text>
@@ -148,6 +154,11 @@ export default function ResultsScreen() {
                   <Text style={[styles.brkAnswer, valid ? styles.brkValid : styles.brkInvalid]}>
                     {answer || '(skipped)'}
                   </Text>
+                  {exampleAnswers.length > 0 && (
+                    <Text style={styles.brkCorrectAnswer}>
+                      💡 {exampleAnswers.join(', ')}
+                    </Text>
+                  )}
                 </View>
                 <Text style={styles.brkStatus}>{valid ? '✅' : answer ? '❌' : '⏭️'}</Text>
               </View>
@@ -160,9 +171,20 @@ export default function ResultsScreen() {
           <TouchableOpacity style={styles.shareBtn} onPress={handleShare} activeOpacity={0.8}>
             <Text style={styles.shareBtnText}>📤 Share Results</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.playAgainBtn} onPress={handlePlayAgain} activeOpacity={0.8}>
-            <Text style={styles.playAgainText}>🔄 Play Again</Text>
-          </TouchableOpacity>
+          <View style={styles.actionsRow}>
+            <TouchableOpacity style={styles.playAgainBtn} onPress={handlePlayAgain} activeOpacity={0.8}>
+              <Text style={styles.playAgainText}>🔄 Play Again</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.showAnswersBtn, showAnswers && styles.showAnswersBtnActive]}
+              onPress={() => setShowAnswers(!showAnswers)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.showAnswersText, showAnswers && styles.showAnswersTextActive]}>
+                {showAnswers ? '🙈 Hide' : '💡 Answers'}
+              </Text>
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity style={styles.homeBtn} onPress={handleHome} activeOpacity={0.8}>
             <Text style={styles.homeBtnText}>🏠 Home</Text>
           </TouchableOpacity>
@@ -230,18 +252,32 @@ const styles = StyleSheet.create({
   brkAnswer: { fontSize: 15, fontWeight: '600', marginTop: 1 },
   brkValid: { color: Colors.correctAnswer },
   brkInvalid: { color: Colors.wrongAnswer },
+  brkCorrectAnswer: {
+    fontSize: 13, fontWeight: '500', color: Colors.accent, marginTop: 4, fontStyle: 'italic',
+  },
   brkStatus: { fontSize: 18, marginLeft: 8 },
   actions: { gap: Spacing.sm },
+  actionsRow: { flexDirection: 'row', gap: Spacing.sm },
   shareBtn: {
     backgroundColor: Colors.secondary, borderRadius: BorderRadius.lg,
     paddingVertical: 14, alignItems: 'center',
   },
   shareBtnText: { fontSize: 16, fontWeight: '700', color: Colors.textPrimary },
   playAgainBtn: {
-    backgroundColor: Colors.primary, borderRadius: BorderRadius.lg,
+    flex: 1, backgroundColor: Colors.primary, borderRadius: BorderRadius.lg,
     paddingVertical: 14, alignItems: 'center',
   },
   playAgainText: { fontSize: 16, fontWeight: '700', color: Colors.textDark },
+  showAnswersBtn: {
+    flex: 1, backgroundColor: Colors.surface, borderRadius: BorderRadius.lg,
+    paddingVertical: 14, alignItems: 'center',
+    borderWidth: 1, borderColor: Colors.accent + '40',
+  },
+  showAnswersBtnActive: {
+    backgroundColor: Colors.accent + '20', borderColor: Colors.accent,
+  },
+  showAnswersText: { fontSize: 16, fontWeight: '700', color: Colors.accent },
+  showAnswersTextActive: { color: Colors.accent },
   homeBtn: {
     backgroundColor: Colors.surface, borderRadius: BorderRadius.lg,
     paddingVertical: 14, alignItems: 'center',

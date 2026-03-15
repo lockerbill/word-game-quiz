@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions, Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -32,8 +32,11 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.logo}>⚡ ALPHA BUCKS</Text>
-          <Text style={styles.subtitle}>Word Game Challenge</Text>
+          <Image
+            source={require('../../assets/images/app_banner.png')}
+            style={styles.bannerImage}
+            resizeMode="contain"
+          />
         </View>
 
         {/* Quick Stats */}
@@ -125,17 +128,9 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     marginBottom: Spacing.lg,
   },
-  logo: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: Colors.primary,
-    letterSpacing: 2,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginTop: 4,
-    letterSpacing: 1,
+  bannerImage: {
+    width: width - Spacing.lg * 2,
+    height: 120,
   },
   statsRow: {
     flexDirection: 'row',
