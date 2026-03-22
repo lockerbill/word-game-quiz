@@ -7,6 +7,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing, BorderRadius, GameModeConfig, GameMode } from '../../src/theme/theme';
 import { useGameStore } from '../../src/store/gameStore';
+import { startGameApi } from '../../src/api/gameApi';
 
 const { width } = Dimensions.get('window');
 
@@ -25,9 +26,19 @@ export default function GamePlayScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [localAnswer, setLocalAnswer] = useState('');
 
-  // Start game on mount
+  // Start game on mount — local first, then try server
   useEffect(() => {
     startGame(gameMode);
+
+    // Try to register the game with the server (fire-and-forget)
+    startGameApi(gameMode)
+      .then((res) => {
+        useGameStore.getState().setServerGameId(res.gameId);
+      })
+      .catch(() => {
+        // Server unreachable — game continues locally
+      });
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };

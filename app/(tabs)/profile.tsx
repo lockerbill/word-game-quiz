@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Colors, Spacing, BorderRadius } from '../../src/theme/theme';
 import { useUserStore } from '../../src/store/userStore';
 import { getXPProgress } from '../../src/engine/Scoring';
@@ -8,6 +9,7 @@ import { ACHIEVEMENTS } from '../../src/gamification/Achievements';
 
 export default function ProfileScreen() {
   const store = useUserStore();
+  const router = useRouter();
   const xpProgress = getXPProgress(store.xp);
   const [editing, setEditing] = React.useState(false);
   const [name, setName] = React.useState(store.username);
@@ -17,6 +19,17 @@ export default function ProfileScreen() {
       store.setUsername(name.trim());
     }
     setEditing(false);
+  };
+
+  const handleLogout = () => {
+    Alert.alert('Sign Out', 'You will continue as a guest.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: () => store.logout(),
+      },
+    ]);
   };
 
   const avgScore = store.gamesPlayed > 0
@@ -51,12 +64,54 @@ export default function ProfileScreen() {
               <Text style={styles.username}>{store.username} ✏️</Text>
             </TouchableOpacity>
           )}
+
+          {/* Account type badge */}
+          {store.isGuest ? (
+            <View style={styles.guestBadge}>
+              <Text style={styles.guestBadgeText}>Guest Account</Text>
+            </View>
+          ) : (
+            <Text style={styles.emailText}>{store.email}</Text>
+          )}
+
           <Text style={styles.levelBadge}>Level {store.level}</Text>
           <View style={styles.xpBar}>
             <View style={[styles.xpFill, { width: `${xpProgress.percentage * 100}%` }]} />
           </View>
           <Text style={styles.xpLabel}>{xpProgress.current} / {xpProgress.required} XP</Text>
         </View>
+
+        {/* Auth Buttons for Guests */}
+        {store.isGuest && (
+          <View style={styles.authSection}>
+            <Text style={styles.authPrompt}>
+              Create an account to save your progress and compete on leaderboards
+            </Text>
+            <View style={styles.authButtons}>
+              <TouchableOpacity
+                style={styles.registerBtn}
+                onPress={() => router.push('/auth/register' as any)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.registerBtnText}>Create Account</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.loginBtn}
+                onPress={() => router.push('/auth/login' as any)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.loginBtnText}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Sign Out for logged-in users */}
+        {!store.isGuest && store.isAuthenticated && (
+          <TouchableOpacity style={styles.signOutBtn} onPress={handleLogout} activeOpacity={0.8}>
+            <Text style={styles.signOutText}>Sign Out</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Stats Grid */}
         <Text style={styles.sectionTitle}>Stats</Text>
@@ -147,6 +202,12 @@ const styles = StyleSheet.create({
   },
   saveBtn: { backgroundColor: Colors.primary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
   saveBtnText: { color: Colors.textDark, fontWeight: '700', fontSize: 13 },
+  guestBadge: {
+    backgroundColor: Colors.accentOrange + '20', borderRadius: BorderRadius.sm,
+    paddingVertical: 4, paddingHorizontal: 12, marginBottom: 4,
+  },
+  guestBadgeText: { color: Colors.accentOrange, fontSize: 12, fontWeight: '600' },
+  emailText: { color: Colors.textTertiary, fontSize: 13, marginBottom: 4 },
   levelBadge: { fontSize: 14, color: Colors.accent, fontWeight: '600', marginBottom: 8 },
   xpBar: {
     width: '80%', height: 8, backgroundColor: Colors.surfaceLight,
@@ -154,6 +215,36 @@ const styles = StyleSheet.create({
   },
   xpFill: { height: '100%', backgroundColor: Colors.primary, borderRadius: 4 },
   xpLabel: { fontSize: 12, color: Colors.textTertiary },
+
+  // Auth section for guests
+  authSection: {
+    backgroundColor: Colors.surface, borderRadius: BorderRadius.lg,
+    padding: Spacing.lg, marginBottom: Spacing.lg,
+    borderWidth: 1, borderColor: Colors.accent + '30',
+  },
+  authPrompt: {
+    fontSize: 14, color: Colors.textSecondary, textAlign: 'center', marginBottom: Spacing.md,
+  },
+  authButtons: { flexDirection: 'row', gap: Spacing.sm },
+  registerBtn: {
+    flex: 1, backgroundColor: Colors.primary, borderRadius: BorderRadius.md,
+    paddingVertical: 12, alignItems: 'center',
+  },
+  registerBtnText: { fontSize: 15, fontWeight: '700', color: Colors.textDark },
+  loginBtn: {
+    flex: 1, backgroundColor: Colors.surface, borderRadius: BorderRadius.md,
+    paddingVertical: 12, alignItems: 'center',
+    borderWidth: 1, borderColor: Colors.glassBorder,
+  },
+  loginBtnText: { fontSize: 15, fontWeight: '700', color: Colors.accent },
+
+  // Sign out
+  signOutBtn: {
+    alignSelf: 'center', marginBottom: Spacing.lg,
+    paddingVertical: 8, paddingHorizontal: 20,
+  },
+  signOutText: { fontSize: 14, color: Colors.accentRed, fontWeight: '600' },
+
   sectionTitle: {
     fontSize: 18, fontWeight: '700', color: Colors.textPrimary, marginBottom: Spacing.md,
   },

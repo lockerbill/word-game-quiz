@@ -5,10 +5,10 @@ import { useUserStore } from '../src/store/userStore';
 import { Colors } from '../src/theme/theme';
 
 export default function RootLayout() {
-  const loadData = useUserStore(s => s.loadData);
+  const initAuth = useUserStore(s => s.initAuth);
 
   useEffect(() => {
-    loadData();
+    initAuth();
   }, []);
 
   return (
@@ -29,6 +29,14 @@ export default function RootLayout() {
         <Stack.Screen
           name="game/results"
           options={{ animation: 'fade', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="auth/login"
+          options={{ animation: 'slide_from_bottom' }}
+        />
+        <Stack.Screen
+          name="auth/register"
+          options={{ animation: 'slide_from_bottom' }}
         />
       </Stack>
     </>

@@ -1,10 +1,13 @@
-// User State Store (Zustand) - manages profile, XP, achievements, history
+// User State Store (Zustand) - manages profile, XP, achievements, history, auth
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLevelFromXP, getXPProgress } from '../engine/Scoring';
 import { checkAchievements, PlayerStats, Achievement, ACHIEVEMENTS } from '../gamification/Achievements';
 import { ScoreResult } from '../engine/Scoring';
 import { GameMode } from '../theme/theme';
+import { guestApi, loginApi, registerApi, upgradeGuestApi, AuthResponse } from '../api/authApi';
+import { getToken, clearToken } from '../api/apiClient';
+import { getProfileApi } from '../api/userApi';
 
 export interface GameRecord {
   id: string;
@@ -26,6 +29,14 @@ interface LeaderboardEntry {
 }
 
 interface UserState {
+  // Auth state
+  token: string | null;
+  serverId: string | null;
+  isAuthenticated: boolean;
+  isGuest: boolean;
+  email: string | null;
+
+  // Profile state
   username: string;
   xp: number;
   level: number;
@@ -47,16 +58,45 @@ interface UserState {
   isLoaded: boolean;
 
   // Actions
+  initAuth: () => Promise<void>;
   loadData: () => Promise<void>;
   saveData: () => Promise<void>;
   setUsername: (name: string) => void;
   recordGame: (record: GameRecord, score: ScoreResult, mode: GameMode, letter: string) => void;
   clearNewAchievements: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  register: (username: string, email: string, password: string) => Promise<void>;
+  upgradeGuest: (username: string, email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  syncFromServer: () => Promise<void>;
 }
 
 const STORAGE_KEY = '@alpha_bucks_user';
 
+function applyAuthResponse(set: any, data: AuthResponse) {
+  set({
+    token: data.access_token,
+    serverId: data.user.id,
+    isAuthenticated: true,
+    isGuest: data.user.isGuest,
+    email: data.user.email,
+    username: data.user.username,
+    level: data.user.level,
+    xp: data.user.xp,
+    gamesPlayed: data.user.gamesPlayed,
+    bestScore: data.user.bestScore,
+  });
+}
+
 export const useUserStore = create<UserState>((set, get) => ({
+  // Auth defaults
+  token: null,
+  serverId: null,
+  isAuthenticated: false,
+  isGuest: true,
+  email: null,
+
+  // Profile defaults
   username: 'Player',
   xp: 0,
   level: 1,
@@ -77,6 +117,35 @@ export const useUserStore = create<UserState>((set, get) => ({
   dailyPlayedDate: null,
   isLoaded: false,
 
+  // Initialize auth: load local data, then try to authenticate with server
+  initAuth: async () => {
+    // Step 1: Load local data first (always works, even offline)
+    await get().loadData();
+
+    // Step 2: Check if we have an existing token
+    try {
+      const existingToken = await getToken();
+      if (existingToken) {
+        // We have a token — try to sync profile from server
+        set({ token: existingToken, isAuthenticated: true });
+        try {
+          await get().syncFromServer();
+        } catch {
+          // Server unreachable — continue with local data
+        }
+        return;
+      }
+
+      // Step 3: No token — create guest account silently
+      const data = await guestApi();
+      applyAuthResponse(set, data);
+      get().saveData();
+    } catch {
+      // Server unreachable on first launch — app works locally
+      set({ isAuthenticated: false });
+    }
+  },
+
   loadData: async () => {
     try {
       const data = await AsyncStorage.getItem(STORAGE_KEY);
@@ -96,6 +165,9 @@ export const useUserStore = create<UserState>((set, get) => ({
       const state = get();
       const toSave = {
         username: state.username,
+        email: state.email,
+        serverId: state.serverId,
+        isGuest: state.isGuest,
         xp: state.xp,
         level: state.level,
         gamesPlayed: state.gamesPlayed,
@@ -180,7 +252,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       updates.newAchievements = newlyUnlocked;
     }
 
-    // Update leaderboard
+    // Update local leaderboard
     const entry: LeaderboardEntry = {
       name: state.username,
       score: score.finalScore,
@@ -194,4 +266,57 @@ export const useUserStore = create<UserState>((set, get) => ({
   },
 
   clearNewAchievements: () => set({ newAchievements: [] }),
+
+  login: async (email: string, password: string) => {
+    const data = await loginApi(email, password);
+    applyAuthResponse(set, data);
+    await get().syncFromServer();
+    get().saveData();
+  },
+
+  register: async (username: string, email: string, password: string) => {
+    const data = await registerApi(username, email, password);
+    applyAuthResponse(set, data);
+    get().saveData();
+  },
+
+  upgradeGuest: async (username: string, email: string, password: string) => {
+    const data = await upgradeGuestApi(username, email, password);
+    applyAuthResponse(set, data);
+    get().saveData();
+  },
+
+  logout: async () => {
+    await clearToken();
+    set({
+      token: null,
+      serverId: null,
+      isAuthenticated: false,
+      isGuest: true,
+      email: null,
+    });
+    get().saveData();
+  },
+
+  syncFromServer: async () => {
+    try {
+      const profile = await getProfileApi();
+      set({
+        serverId: profile.id,
+        isGuest: profile.isGuest,
+        email: profile.email,
+        username: profile.username,
+        level: profile.level,
+        xp: profile.xp,
+        gamesPlayed: profile.gamesPlayed,
+        bestScore: profile.bestScore,
+        totalScore: profile.totalScore,
+        perfectGames: profile.perfectGames,
+        currentStreak: profile.currentStreak,
+        longestStreak: profile.longestStreak,
+      });
+    } catch {
+      // Server unreachable — keep local data
+    }
+  },
 }));
