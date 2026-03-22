@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { GameModule } from './game/game.module.js';
 import { LeaderboardModule } from './leaderboard/leaderboard.module.js';
 import { UserModule } from './user/user.module.js';
+import { DatabaseModule } from './database/database.module.js';
 import { RedisModule } from './redis/redis.module.js';
 import { User } from './entities/user.entity.js';
 import { Game } from './entities/game.entity.js';
@@ -40,6 +41,9 @@ import { Answer } from './entities/answer.entity.js';
 
     // Global modules
     RedisModule,
+
+    // Database seeding
+    DatabaseModule,
 
     // Feature modules
     AuthModule,

@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Game } from './game.entity';
-import { Category } from './category.entity';
 
 @Entity('game_answers')
 export class GameAnswer {
@@ -14,12 +13,10 @@ export class GameAnswer {
   @JoinColumn({ name: 'game_id' })
   game: Game;
 
+  // Plain column — no FK to categories table.
+  // Category IDs reference the in-memory CATEGORIES dataset.
   @Column({ name: 'category_id' })
   categoryId: number;
-
-  @ManyToOne(() => Category)
-  @JoinColumn({ name: 'category_id' })
-  category: Category;
 
   @Column({ default: '' })
   answer: string;

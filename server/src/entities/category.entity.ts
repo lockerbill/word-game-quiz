@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
 import { Answer } from './answer.entity';
 
 @Entity('categories')
 export class Category {
-  @PrimaryGeneratedColumn()
+  // Explicit ID — must match the hardcoded CATEGORIES dataset
+  @PrimaryColumn()
   id: number;
 
   @Column({ length: 100, unique: true })
