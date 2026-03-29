@@ -6,7 +6,11 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "web:export": "expo export --platform web",
+    "web:serve": "http-server dist -p 4173 -c-1",
+    "web:test:server": "npm run web:export && npm run web:serve",
+    "test:web": "playwright test"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -35,7 +39,9 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.1",
     "@types/react": "~19.2.2",
+    "http-server": "^14.1.1",
     "typescript": "~5.9.2"
   },
   "private": true
