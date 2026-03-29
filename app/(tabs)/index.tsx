@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions, Image,
 } from 'react-native';
@@ -8,17 +8,64 @@ import { Colors, Spacing, BorderRadius, Typography, GameModeConfig, GameMode } f
 import { useUserStore } from '../../src/store/userStore';
 import { getXPProgress } from '../../src/engine/Scoring';
 import { getDailyChallenge } from '../../src/engine/GameEngine';
+import { getDailyApi } from '../../src/api/gameApi';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { username, xp, level, gamesPlayed, bestScore, dailyPlayedDate } = useUserStore();
+  const {
+    username,
+    xp,
+    level,
+    gamesPlayed,
+    bestScore,
+    dailyPlayedDate,
+    isLoaded,
+    token,
+  } = useUserStore();
+  const [daily, setDaily] = useState(() => {
+    const fallback = getDailyChallenge();
+    return {
+      letter: fallback.letter,
+      date: new Date().toISOString().split('T')[0],
+    };
+  });
 
   const xpProgress = getXPProgress(xp);
-  const daily = getDailyChallenge();
-  const today = new Date().toISOString().split('T')[0];
-  const dailyPlayed = dailyPlayedDate === today;
+  const dailyPlayed = dailyPlayedDate === daily.date;
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    let cancelled = false;
+
+    const fetchDaily = async () => {
+      try {
+        const serverDaily = await getDailyApi();
+        if (cancelled) return;
+
+        setDaily({
+          letter: serverDaily.letter,
+          date: serverDaily.date,
+        });
+      } catch {
+        if (cancelled) return;
+
+        const fallback = getDailyChallenge();
+        setDaily({
+          letter: fallback.letter,
+          date: new Date().toISOString().split('T')[0],
+        });
+      }
+    };
+
+    fetchDaily();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoaded, token]);
 
   const modes: GameMode[] = ['practice', 'ranked', 'daily', 'relax', 'hardcore'];
 

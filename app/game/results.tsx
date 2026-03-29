@@ -10,7 +10,7 @@ import { getAnswersForCategory } from '../../src/data/answers';
 
 export default function ResultsScreen() {
   const router = useRouter();
-  const { session, resetGame } = useGameStore();
+  const { session, submissionStatus, resetGame } = useGameStore();
   const { recordGame, newAchievements, clearNewAchievements } = useUserStore();
   const scoreAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -114,6 +114,22 @@ export default function ResultsScreen() {
               <Text style={styles.pointLabel}>Multiplier</Text>
             </View>
           </View>
+
+          {submissionStatus === 'submitting' && (
+            <View style={[styles.serverStatusPill, styles.serverStatusPending]}>
+              <Text style={styles.serverStatusText}>Syncing with server validation...</Text>
+            </View>
+          )}
+          {submissionStatus === 'submitted' && (
+            <View style={[styles.serverStatusPill, styles.serverStatusSuccess]}>
+              <Text style={styles.serverStatusText}>Server-validated results</Text>
+            </View>
+          )}
+          {submissionStatus === 'failed' && (
+            <View style={[styles.serverStatusPill, styles.serverStatusFallback]}>
+              <Text style={styles.serverStatusText}>Offline fallback: showing local validation</Text>
+            </View>
+          )}
         </Animated.View>
 
         {/* New Achievements */}
@@ -219,6 +235,30 @@ const styles = StyleSheet.create({
   pointValue: { fontSize: 20, fontWeight: '800', color: Colors.textPrimary },
   pointLabel: { fontSize: 11, color: Colors.textTertiary, marginTop: 2 },
   pointDivider: { width: 1, height: 30, backgroundColor: Colors.glassBorder },
+  serverStatusPill: {
+    marginTop: Spacing.sm,
+    borderRadius: BorderRadius.round,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  serverStatusPending: {
+    backgroundColor: Colors.accentOrange + '20',
+    borderColor: Colors.accentOrange + '55',
+  },
+  serverStatusSuccess: {
+    backgroundColor: Colors.accentGreen + '20',
+    borderColor: Colors.accentGreen + '55',
+  },
+  serverStatusFallback: {
+    backgroundColor: Colors.surface,
+    borderColor: Colors.glassBorder,
+  },
+  serverStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+  },
   achieveSection: {
     backgroundColor: Colors.surface, borderRadius: BorderRadius.lg,
     padding: Spacing.md, marginBottom: Spacing.lg,

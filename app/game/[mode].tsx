@@ -18,7 +18,7 @@ export default function GamePlayScreen() {
 
   const {
     session, timeRemaining, isPlaying, isFinished,
-    startGame, setAnswer, tick, finishGame,
+    startGame, startGameFromServer, setAnswer, tick, finishGame,
   } = useGameStore();
 
   const inputRef = useRef<TextInput | null>(null);
@@ -26,23 +26,28 @@ export default function GamePlayScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [localAnswer, setLocalAnswer] = useState('');
 
-  // Start game on mount — local first, then try server
+  // Start game on mount — server first, local fallback
   useEffect(() => {
-    startGame(gameMode);
+    let cancelled = false;
 
-    // Try to register the game with the server (fire-and-forget)
-    startGameApi(gameMode)
-      .then((res) => {
-        useGameStore.getState().setServerGameId(res.gameId);
-      })
-      .catch(() => {
-        // Server unreachable — game continues locally
-      });
+    const startSession = async () => {
+      try {
+        const res = await startGameApi(gameMode);
+        if (cancelled) return;
+        startGameFromServer(gameMode, res);
+      } catch {
+        if (cancelled) return;
+        startGame(gameMode);
+      }
+    };
+
+    startSession();
 
     return () => {
+      cancelled = true;
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [gameMode, startGame, startGameFromServer]);
 
   // Timer tick
   useEffect(() => {

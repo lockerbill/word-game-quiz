@@ -239,9 +239,9 @@ export class GameService {
   } {
     const today = new Date();
     const seed =
-      today.getFullYear() * 10000 +
-      (today.getMonth() + 1) * 100 +
-      today.getDate();
+      today.getUTCFullYear() * 10000 +
+      (today.getUTCMonth() + 1) * 100 +
+      today.getUTCDate();
     const rand = this.seededRandom(seed);
 
     const letters = Object.keys(LETTER_CONFIG);

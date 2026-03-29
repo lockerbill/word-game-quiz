@@ -63,7 +63,7 @@ function selectCategoriesForGame(): Category[] {
 // Daily challenge: deterministic based on date
 function getDailySeed(): number {
   const today = new Date();
-  return today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  return today.getUTCFullYear() * 10000 + (today.getUTCMonth() + 1) * 100 + today.getUTCDate();
 }
 
 function seededRandom(seed: number): () => number {

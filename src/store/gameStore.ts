@@ -4,17 +4,20 @@ import { GameSession, createGameSession, submitAnswer, endGame } from '../engine
 import { ValidationResult } from '../engine/AnswerValidator';
 import { ScoreResult } from '../engine/Scoring';
 import { GameMode } from '../theme/theme';
-import { submitGameApi } from '../api/gameApi';
+import { GameStartResponse, submitGameApi } from '../api/gameApi';
+import { Category } from '../data/categories';
 
 interface GameState {
   session: GameSession | null;
   serverGameId: string | null; // gameId from server (if online)
+  submissionStatus: 'idle' | 'submitting' | 'submitted' | 'failed';
   timeRemaining: number;
   isPlaying: boolean;
   isFinished: boolean;
 
   // Actions
   startGame: (mode: GameMode) => void;
+  startGameFromServer: (mode: GameMode, payload: GameStartResponse) => void;
   setServerGameId: (id: string) => void;
   setAnswer: (categoryId: number, answer: string) => ValidationResult | null;
   tick: () => void;
@@ -26,6 +29,7 @@ interface GameState {
 export const useGameStore = create<GameState>((set, get) => ({
   session: null,
   serverGameId: null,
+  submissionStatus: 'idle',
   timeRemaining: 0,
   isPlaying: false,
   isFinished: false,
@@ -35,7 +39,40 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({
       session,
       serverGameId: null,
+      submissionStatus: 'idle',
       timeRemaining: session.timerDuration,
+      isPlaying: true,
+      isFinished: false,
+    });
+  },
+
+  startGameFromServer: (mode: GameMode, payload: GameStartResponse) => {
+    const categories: Category[] = payload.categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      emoji: category.emoji,
+      difficulty: category.difficulty === 3 ? 3 : category.difficulty === 2 ? 2 : 1,
+    }));
+
+    const session: GameSession = {
+      id: payload.gameId,
+      mode,
+      letter: payload.letter,
+      categories,
+      answers: {},
+      validations: {},
+      timerDuration: payload.timerDuration,
+      timeUsed: 0,
+      startedAt: Date.now(),
+      endedAt: null,
+      score: null,
+    };
+
+    set({
+      session,
+      serverGameId: payload.gameId,
+      submissionStatus: 'idle',
+      timeRemaining: payload.timerDuration,
       isPlaying: true,
       isFinished: false,
     });
@@ -72,17 +109,48 @@ export const useGameStore = create<GameState>((set, get) => ({
       ? session.timerDuration - timeRemaining
       : Math.round((Date.now() - session.startedAt) / 1000);
     const score = endGame(session, timeUsed);
-    set({ session: { ...session }, isPlaying: false, isFinished: true });
+    set({
+      session: { ...session },
+      isPlaying: false,
+      isFinished: true,
+      submissionStatus: serverGameId ? 'submitting' : 'failed',
+    });
 
-    // Submit to server in background (fire-and-forget, offline-safe)
+    // Submit to server in background, then replace local score/validations with server truth
     if (serverGameId) {
       const answers = session.categories.map((cat) => ({
         categoryId: cat.id,
         answer: session.answers[cat.id] || '',
       }));
-      submitGameApi(serverGameId, answers, timeUsed).catch(() => {
-        // Server unreachable — score is already recorded locally
-      });
+      submitGameApi(serverGameId, answers, timeUsed)
+        .then((response) => {
+          const currentSession = get().session;
+          if (!currentSession || currentSession.id !== session.id) return;
+
+          const nextSession: GameSession = {
+            ...currentSession,
+            score: response.score,
+            validations: response.validations.reduce((acc, item) => {
+              acc[item.categoryId] = {
+                valid: item.valid,
+                confidence: item.confidence,
+                matchedAnswer: null,
+                reason: item.valid ? 'fuzzy_match' : 'no_match',
+              };
+              return acc;
+            }, {} as Record<number, ValidationResult>),
+          };
+
+          set({
+            session: nextSession,
+            submissionStatus: 'submitted',
+          });
+        })
+        .catch(() => {
+          const currentSession = get().session;
+          if (!currentSession || currentSession.id !== session.id) return;
+          set({ submissionStatus: 'failed' });
+        });
     }
 
     return score;
@@ -92,6 +160,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({
       session: null,
       serverGameId: null,
+      submissionStatus: 'idle',
       timeRemaining: 0,
       isPlaying: false,
       isFinished: false,
