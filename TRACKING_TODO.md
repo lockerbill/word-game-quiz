@@ -19,19 +19,19 @@ REQ-APP-NAV-001 - App navigation shell
 
 REQ-GAME-MODES-001 - Practice mode (30s / 10 categories)
 - Status: DONE (client); server supports it too
-- Evidence: `src/engine/GameEngine.ts`, `app/game/[mode].tsx`, `server/src/game/game.service.ts`
+- Evidence: `app/game/[mode].tsx`, `src/store/gameStore.ts`, `server/src/game/game.service.ts`
 
 REQ-GAME-MODES-002 - Relax mode (no timer)
 - Status: DONE
-- Evidence: `src/engine/GameEngine.ts`, `app/game/[mode].tsx`, `server/src/game/game.service.ts`
+- Evidence: `app/game/[mode].tsx`, `src/store/gameStore.ts`, `server/src/game/game.service.ts`
 
 REQ-GAME-MODES-003 - Hardcore mode (20s + hard letters)
 - Status: DONE
-- Evidence: `src/data/letterWeights.ts`, `src/engine/GameEngine.ts`, `server/src/game-data/letter-weights.ts`
+- Evidence: `src/theme/theme.ts`, `server/src/game-data/letter-weights.ts`, `server/src/game/game.service.ts`
 
 REQ-ENGINE-LETTER-001 - Weighted letter selection
 - Status: DONE
-- Evidence: `src/data/letterWeights.ts`, `server/src/game-data/letter-weights.ts`
+- Evidence: `server/src/game-data/letter-weights.ts`, `server/src/game/game.service.ts`
 
 REQ-ENGINE-SCORE-001 - Score + multiplier + time bonus + XP
 - Status: DONE
@@ -48,6 +48,13 @@ REQ-AUTH-API-001 - Auth (register/login/guest/upgrade)
 REQ-USER-API-001 - User profile/stats/history endpoints
 - Status: DONE (server); app uses profile sync partially
 - Evidence: `server/src/user/user.controller.ts`, `server/src/user/user.service.ts`, `src/api/userApi.ts`, `src/store/userStore.ts`
+
+REQ-CLIENT-SERVER-SOURCE-001 - Single source of truth for game data
+- Status: DONE
+- Current behavior:
+  - Game sessions, daily challenge, and answer validation use server API/DB as the source of truth.
+  - Offline gameplay fallback has been removed.
+- Evidence: `server/src/game/game.service.ts`, `server/src/game/game.module.ts`, `app/game/[mode].tsx`, `app/(tabs)/index.tsx`, `src/store/gameStore.ts`
 
 REQ-GAMIFICATION-001 - XP + levels + achievements
 - Status: DONE (local)
@@ -72,22 +79,18 @@ REQ-GAME-MODES-010 - Ranked mode (competitive)
   - Filter/global leaderboard by mode or add dedicated ranked endpoints.
 
 REQ-GAME-DAILY-001 - Daily challenge (same letter + categories for everyone)
-- Status: PARTIAL
+- Status: DONE
 - Current behavior:
-  - Client generates daily deterministically locally.
-  - Server also generates daily deterministically.
-  - The app home screen uses local daily (`getDailyChallenge()`), not `GET /api/game/daily`.
-- Evidence: `src/engine/GameEngine.ts`, `src/api/gameApi.ts`, `server/src/game/game.service.ts`, `app/(tabs)/index.tsx`
-- TODO:
-  - Make the app consume `GET /api/game/daily` as the single source of truth.
-  - Add fallback to local daily only when offline.
+  - App consumes `GET /api/game/daily` for daily banner data.
+  - Server generates deterministic daily challenge and returns date+letter+categories.
+- Evidence: `src/api/gameApi.ts`, `server/src/game/game.service.ts`, `app/(tabs)/index.tsx`
 
 REQ-VALIDATION-PIPELINE-001 - Answer validation pipeline
 - Status: PARTIAL
 - Current behavior:
   - Validates "starts with letter" + exact/fuzzy match against a small curated answer list.
   - If no answers exist for a category+letter, validation is lenient (accepts as valid with 0.5 confidence).
-- Evidence: `src/engine/AnswerValidator.ts`, `server/src/game-data/answer-validator.ts`
+- Evidence: `server/src/game-data/answer-validator.ts`, `server/src/game/game.service.ts`, `app/game/results.tsx`
 - TODO:
   - Replace lenient fallback with a stronger approach (AI validation or stricter rules).
   - Persist and display server validations in the app results (currently results come from local session).
@@ -95,25 +98,17 @@ REQ-VALIDATION-PIPELINE-001 - Answer validation pipeline
 REQ-OFFLINE-001 - Offline practice
 - Status: PARTIAL
 - Current behavior:
-  - App can play offline using in-bundle datasets and saves stats to AsyncStorage.
+  - Offline gameplay is disabled; app shows friendly unavailable states with retry for game start/daily fetch failures.
   - No SQLite preload or content packs.
-- Evidence: `src/store/userStore.ts`, `src/data/*`
+- Evidence: `app/game/[mode].tsx`, `app/(tabs)/index.tsx`
 - TODO:
   - Add SQLite store and preload sets per SRS.
 
 REQ-DATASET-SCALE-001 - 10,000+ categories and 100k+ answers
 - Status: PARTIAL (small static dataset + DB seeding)
-- Evidence: `src/data/categories.ts`, `src/data/answers.ts`, `server/src/database/seed.service.ts`
+- Evidence: `server/src/game-data/categories.ts`, `server/src/game-data/answers.ts`, `server/src/database/seed.service.ts`
 - TODO:
   - Move selection/validation to DB-first; implement ingestion pipeline.
-
-REQ-CLIENT-SERVER-SOURCE-001 - Single source of truth for game data
-- Status: PARTIAL
-- Current behavior:
-  - Datasets duplicated between client and server.
-- Evidence: `src/data/*` and `server/src/game-data/*`
-- TODO:
-  - Decide source (DB/API vs bundle) and remove duplication drift.
 
 ---
 

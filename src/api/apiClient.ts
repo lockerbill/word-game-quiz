@@ -1,4 +1,4 @@
-// API Client - Axios instance with JWT interceptor and offline fallback
+// API Client - Axios instance with JWT interceptor
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -38,16 +38,6 @@ export async function getToken(): Promise<string | null> {
 
 export async function clearToken(): Promise<void> {
   await AsyncStorage.removeItem(TOKEN_KEY);
-}
-
-// Check if server is reachable (for offline fallback)
-export async function isServerReachable(): Promise<boolean> {
-  try {
-    await api.get('/', { timeout: 3_000 });
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 export default api;

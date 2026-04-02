@@ -1,5 +1,5 @@
 // Letter difficulty weights and score multipliers
-// Mirrors frontend src/data/letterWeights.ts
+// Used by server scoring and letter selection
 
 export interface LetterConfig {
   letter: string;

@@ -119,7 +119,7 @@ export const useUserStore = create<UserState>((set, get) => ({
 
   // Initialize auth: load local data, then try to authenticate with server
   initAuth: async () => {
-    // Step 1: Load local data first (always works, even offline)
+    // Step 1: Load cached data first for fast startup
     await get().loadData();
 
     // Step 2: Check if we have an existing token
@@ -131,7 +131,7 @@ export const useUserStore = create<UserState>((set, get) => ({
         try {
           await get().syncFromServer();
         } catch {
-          // Server unreachable — continue with local data
+          // Server unreachable — continue with cached data
         }
         return;
       }

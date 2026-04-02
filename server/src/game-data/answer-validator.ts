@@ -1,6 +1,5 @@
-// Server-side answer validation - mirrors frontend AnswerValidator.ts
+// Server-side answer validation logic
 import stringSimilarity from 'string-similarity';
-import { getAnswersForCategory } from './answers.js';
 
 export interface ValidationResult {
   valid: boolean;
@@ -12,9 +11,9 @@ export interface ValidationResult {
 const FUZZY_THRESHOLD = 0.75;
 
 export function validateAnswer(
-  categoryName: string,
   letter: string,
   userAnswer: string,
+  knownAnswers: string[],
 ): ValidationResult {
   const trimmed = userAnswer.trim();
 
@@ -32,8 +31,6 @@ export function validateAnswer(
       reason: 'wrong_letter',
     };
   }
-
-  const knownAnswers = getAnswersForCategory(categoryName, letter);
 
   // Exact match (case-insensitive)
   const exactMatch = knownAnswers.find(

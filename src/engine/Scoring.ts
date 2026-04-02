@@ -1,5 +1,4 @@
 // Scoring System
-import { getLetterMultiplier } from '../data/letterWeights';
 
 export interface ScoreResult {
   correctCount: number;
@@ -10,40 +9,6 @@ export interface ScoreResult {
   xpEarned: number;
   timeBonus: number;
   perfectBonus: boolean;
-}
-
-export function calculateScore(
-  correctCount: number,
-  totalQuestions: number,
-  letter: string,
-  timeUsedSeconds: number,
-  timerDuration: number // 0 = relax mode
-): ScoreResult {
-  const multiplier = getLetterMultiplier(letter);
-  const rawScore = correctCount;
-
-  // Time bonus: faster completion = more bonus (only if timed)
-  let timeBonus = 0;
-  if (timerDuration > 0 && correctCount > 0) {
-    const timeRatio = 1 - (timeUsedSeconds / timerDuration);
-    timeBonus = Math.round(timeRatio * correctCount * 2); // up to 2x bonus points
-    timeBonus = Math.max(0, timeBonus);
-  }
-
-  const finalScore = Math.round((rawScore + timeBonus) * multiplier);
-  const perfectBonus = correctCount === totalQuestions;
-  const xpEarned = correctCount * 10 + (perfectBonus ? 50 : 0) + timeBonus * 5;
-
-  return {
-    correctCount,
-    totalQuestions,
-    rawScore,
-    multiplier,
-    finalScore,
-    xpEarned,
-    timeBonus,
-    perfectBonus,
-  };
 }
 
 // XP Level Thresholds

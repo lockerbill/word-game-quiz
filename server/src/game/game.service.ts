@@ -1,20 +1,16 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Game } from '../entities/game.entity.js';
 import { GameAnswer } from '../entities/game-answer.entity.js';
 import { User } from '../entities/user.entity.js';
+import { Category } from '../entities/category.entity.js';
+import { Answer } from '../entities/answer.entity.js';
 import { StartGameDto, SubmitGameDto } from './dto/game.dto.js';
-import {
-  CATEGORIES,
-  getCategoryById,
-  type CategoryData,
-} from '../game-data/categories.js';
 import {
   LETTER_CONFIG,
   selectWeightedLetter,
 } from '../game-data/letter-weights.js';
-import { getCategoriesWithAnswers } from '../game-data/answers.js';
 import { validateAnswer } from '../game-data/answer-validator.js';
 import {
   calculateScore,
@@ -28,7 +24,7 @@ interface PendingGame {
   userId: string;
   mode: string;
   letter: string;
-  categories: CategoryData[];
+  categories: Pick<Category, 'id' | 'name' | 'difficulty' | 'emoji'>[];
   timerDuration: number;
   createdAt: number;
 }
@@ -54,21 +50,25 @@ export class GameService {
     private gameAnswerRepo: Repository<GameAnswer>,
     @InjectRepository(User)
     private userRepo: Repository<User>,
+    @InjectRepository(Category)
+    private categoryRepo: Repository<Category>,
+    @InjectRepository(Answer)
+    private answerRepo: Repository<Answer>,
   ) {}
 
   async startGame(userId: string, dto: StartGameDto) {
     const { mode } = dto;
 
     let letter: string;
-    let categories: CategoryData[];
+    let categories: Pick<Category, 'id' | 'name' | 'difficulty' | 'emoji'>[];
 
     if (mode === 'daily') {
-      const daily = this.getDailyChallenge();
+      const daily = await this.getDailyChallenge();
       letter = daily.letter;
       categories = daily.categories;
     } else {
       letter = selectWeightedLetter(mode === 'hardcore');
-      categories = this.selectCategoriesForGame();
+      categories = await this.selectCategoriesForGame();
     }
 
     const timerDuration = this.getTimerDuration(mode);
@@ -118,11 +118,27 @@ export class GameService {
       confidence: number;
     }[] = [];
 
+    const categoryIds = pending.categories.map((c) => c.id);
+    const answers = await this.answerRepo.find({
+      where: {
+        categoryId: In(categoryIds),
+        letter: pending.letter.toUpperCase(),
+      },
+    });
+
+    const answerMap = new Map<number, string[]>();
+    for (const row of answers) {
+      const existing = answerMap.get(row.categoryId) || [];
+      existing.push(row.answer);
+      answerMap.set(row.categoryId, existing);
+    }
+
     for (const cat of pending.categories) {
       const submitted = dto.answers.find((a) => a.categoryId === cat.id);
       const userAnswer = submitted?.answer ?? '';
 
-      const result = validateAnswer(cat.name, pending.letter, userAnswer);
+      const knownAnswers = answerMap.get(cat.id) || [];
+      const result = validateAnswer(pending.letter, userAnswer, knownAnswers);
       validations.push({
         categoryId: cat.id,
         categoryName: cat.name,
@@ -185,7 +201,7 @@ export class GameService {
   }
 
   async getDaily() {
-    const daily = this.getDailyChallenge();
+    const daily = await this.getDailyChallenge();
     return {
       letter: daily.letter,
       categories: daily.categories.map((c) => ({
@@ -217,26 +233,35 @@ export class GameService {
     }
   }
 
-  private selectCategoriesForGame(): CategoryData[] {
-    const categoriesWithAnswers = getCategoriesWithAnswers();
-    const eligible = CATEGORIES.filter((c) =>
-      categoriesWithAnswers.includes(c.name),
-    );
+  private async selectCategoriesForGame(): Promise<
+    Pick<Category, 'id' | 'name' | 'difficulty' | 'emoji'>[]
+  > {
+    const categories = await this.categoryRepo
+      .createQueryBuilder('category')
+      .innerJoin('category.answers', 'answer')
+      .where('category.enabled = :enabled', { enabled: true })
+      .select([
+        'category.id',
+        'category.name',
+        'category.difficulty',
+        'category.emoji',
+      ])
+      .distinct(true)
+      .orderBy('RANDOM()')
+      .limit(10)
+      .getMany();
 
-    if (eligible.length >= 10) {
-      const shuffled = [...eligible].sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, 10);
+    if (categories.length < 10) {
+      throw new NotFoundException('Not enough categories with answers in database');
     }
 
-    // Fallback: random from all categories
-    const shuffled = [...CATEGORIES].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 10);
+    return categories;
   }
 
-  private getDailyChallenge(): {
+  private async getDailyChallenge(): Promise<{
     letter: string;
-    categories: CategoryData[];
-  } {
+    categories: Pick<Category, 'id' | 'name' | 'difficulty' | 'emoji'>[];
+  }> {
     const today = new Date();
     const seed =
       today.getUTCFullYear() * 10000 +
@@ -248,12 +273,25 @@ export class GameService {
     const letterIdx = Math.floor(rand() * letters.length);
     const letter = letters[letterIdx];
 
-    const categoriesWithAnswers = getCategoriesWithAnswers();
-    const eligible = CATEGORIES.filter((c) =>
-      categoriesWithAnswers.includes(c.name),
-    );
+    const eligible = await this.categoryRepo
+      .createQueryBuilder('category')
+      .innerJoin('category.answers', 'answer')
+      .where('category.enabled = :enabled', { enabled: true })
+      .select([
+        'category.id',
+        'category.name',
+        'category.difficulty',
+        'category.emoji',
+      ])
+      .distinct(true)
+      .orderBy('category.id', 'ASC')
+      .getMany();
     const shuffled = [...eligible].sort(() => rand() - 0.5);
     const categories = shuffled.slice(0, 10);
+
+    if (categories.length < 10) {
+      throw new NotFoundException('Not enough categories with answers in database');
+    }
 
     return { letter, categories };
   }

@@ -1,4 +1,4 @@
-// Answer database - mirrors frontend src/data/answers.ts
+// Answer database for server-side validation
 // Maps category name -> letter -> array of valid answers
 
 type AnswerDB = Record<string, Record<string, string[]>>;

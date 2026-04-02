@@ -1,4 +1,4 @@
-// Scoring system - mirrors frontend src/engine/Scoring.ts
+// Scoring system used by server submit pipeline
 import { getLetterMultiplier } from './letter-weights.js';
 
 export interface ScoreResult {

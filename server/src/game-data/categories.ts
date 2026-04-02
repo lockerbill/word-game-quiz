@@ -1,4 +1,4 @@
-// Category dataset - mirrors frontend src/data/categories.ts
+// Category dataset used for DB seeding
 
 export interface CategoryData {
   id: number;

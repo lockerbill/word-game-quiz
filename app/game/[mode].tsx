@@ -1,15 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   View, Text, TextInput, StyleSheet, TouchableOpacity,
-  KeyboardAvoidingView, Platform, Dimensions,
+  KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing, BorderRadius, GameModeConfig, GameMode } from '../../src/theme/theme';
 import { useGameStore } from '../../src/store/gameStore';
 import { startGameApi } from '../../src/api/gameApi';
-
-const { width } = Dimensions.get('window');
 
 export default function GamePlayScreen() {
   const { mode } = useLocalSearchParams<{ mode: string }>();
@@ -18,36 +16,38 @@ export default function GamePlayScreen() {
 
   const {
     session, timeRemaining, isPlaying, isFinished,
-    startGame, startGameFromServer, setAnswer, tick, finishGame,
+    submissionStatus,
+    startGameFromServer, setAnswer, tick, finishGame,
   } = useGameStore();
 
   const inputRef = useRef<TextInput | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [localAnswer, setLocalAnswer] = useState('');
+  const [isStarting, setIsStarting] = useState(true);
+  const [startError, setStartError] = useState<string | null>(null);
 
-  // Start game on mount — server first, local fallback
+  const loadSession = useCallback(async () => {
+    setIsStarting(true);
+    setStartError(null);
+    try {
+      const res = await startGameApi(gameMode);
+      startGameFromServer(gameMode, res);
+    } catch {
+      setStartError('We could not reach the game server. Check your connection and try again.');
+    } finally {
+      setIsStarting(false);
+    }
+  }, [gameMode, startGameFromServer]);
+
+  // Start game on mount — server only
   useEffect(() => {
-    let cancelled = false;
-
-    const startSession = async () => {
-      try {
-        const res = await startGameApi(gameMode);
-        if (cancelled) return;
-        startGameFromServer(gameMode, res);
-      } catch {
-        if (cancelled) return;
-        startGame(gameMode);
-      }
-    };
-
-    startSession();
+    void loadSession();
 
     return () => {
-      cancelled = true;
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [gameMode, startGame, startGameFromServer]);
+  }, [loadSession]);
 
   // Timer tick
   useEffect(() => {
@@ -65,10 +65,10 @@ export default function GamePlayScreen() {
 
   // Navigate to results when finished
   useEffect(() => {
-    if (isFinished && session?.score) {
+    if (isFinished) {
       router.replace('/game/results');
     }
-  }, [isFinished]);
+  }, [isFinished, router]);
 
   // Auto-focus the input when question changes
   useEffect(() => {
@@ -122,20 +122,39 @@ export default function GamePlayScreen() {
     setCurrentIndex(prev => (prev - 1 + total) % total);
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (!session) return;
     // Submit current answer first
     const cat = session.categories[currentIndex];
     if (cat && localAnswer.trim()) {
       setAnswer(cat.id, localAnswer.trim());
     }
-    finishGame();
+    await finishGame();
   };
 
-  if (!session) {
+  if (isStarting) {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.loading}>Loading...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (!session || startError) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.unavailableCard}>
+          <Text style={styles.unavailableTitle}>Server unavailable</Text>
+          <Text style={styles.unavailableMessage}>
+            {startError || 'Unable to start a round right now. Please try again.'}
+          </Text>
+          <TouchableOpacity style={styles.retryButton} onPress={() => void loadSession()} activeOpacity={0.8}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.homeButton} onPress={() => router.replace('/')} activeOpacity={0.8}>
+            <Text style={styles.homeButtonText}>Back Home</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
@@ -149,7 +168,7 @@ export default function GamePlayScreen() {
     : 1;
 
   const cat = session.categories[currentIndex];
-  const answeredCount = Object.values(session.validations).filter(v => v.valid).length;
+  const answeredCount = Object.keys(session.answers).length;
   const totalAnswered = Object.keys(session.answers).length;
 
   return (
@@ -192,7 +211,8 @@ export default function GamePlayScreen() {
         <View style={styles.dotsRow}>
           {session.categories.map((c, i) => {
             const hasAnswer = !!session.answers[c.id];
-            const isValid = session.validations[c.id]?.valid;
+            const validation = session.validations[c.id];
+            const isValid = validation?.valid;
             const isCurrent = i === currentIndex;
             return (
               <TouchableOpacity
@@ -208,8 +228,9 @@ export default function GamePlayScreen() {
                 style={[
                   styles.dot,
                   isCurrent && styles.dotCurrent,
-                  hasAnswer && isValid && styles.dotCorrect,
-                  hasAnswer && !isValid && styles.dotWrong,
+                  hasAnswer && styles.dotAnswered,
+                  validation && isValid && styles.dotCorrect,
+                  validation && !isValid && styles.dotWrong,
                 ]}
               >
                 <Text style={styles.dotText}>{i + 1}</Text>
@@ -276,12 +297,28 @@ export default function GamePlayScreen() {
           <TouchableOpacity
             style={styles.finishBtn}
             onPress={handleFinish}
+            disabled={submissionStatus === 'submitting'}
             activeOpacity={0.8}
           >
             <Text style={styles.finishBtnText}>
-              {totalAnswered >= session.categories.length ? '🏁 FINISH' : `🏁 FINISH (${totalAnswered}/${session.categories.length} answered)`}
+              {submissionStatus === 'submitting'
+                ? 'Submitting...'
+                : totalAnswered >= session.categories.length
+                  ? '🏁 FINISH'
+                  : `🏁 FINISH (${totalAnswered}/${session.categories.length} answered)`}
             </Text>
           </TouchableOpacity>
+
+          {submissionStatus === 'failed' && (
+            <View style={styles.submitErrorCard}>
+              <Text style={styles.submitErrorText}>
+                We could not submit your game yet. Please retry.
+              </Text>
+              <TouchableOpacity style={styles.retryButton} onPress={handleFinish} activeOpacity={0.8}>
+                <Text style={styles.retryButtonText}>Retry Submit</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -326,6 +363,9 @@ const styles = StyleSheet.create({
   },
   dotCurrent: {
     borderColor: Colors.primary, backgroundColor: Colors.primary + '20',
+  },
+  dotAnswered: {
+    borderColor: Colors.accentOrange + '70',
   },
   dotCorrect: {
     borderColor: Colors.correctAnswer, backgroundColor: Colors.correctAnswer + '20',
@@ -398,5 +438,64 @@ const styles = StyleSheet.create({
   },
   finishBtnText: {
     fontSize: 16, fontWeight: '800', color: Colors.textDark, letterSpacing: 0.5,
+  },
+  unavailableCard: {
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.xl,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+  },
+  unavailableTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.sm,
+    textAlign: 'center',
+  },
+  unavailableMessage: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: Spacing.md,
+  },
+  retryButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  retryButtonText: {
+    color: Colors.textDark,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  homeButton: {
+    marginTop: Spacing.sm,
+    backgroundColor: Colors.surfaceLight,
+    borderRadius: BorderRadius.md,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  homeButtonText: {
+    color: Colors.textSecondary,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  submitErrorCard: {
+    marginTop: Spacing.sm,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.accentOrange + '60',
+    gap: Spacing.sm,
+  },
+  submitErrorText: {
+    color: Colors.textSecondary,
+    fontSize: 13,
+    textAlign: 'center',
   },
 });

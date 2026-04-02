@@ -4,10 +4,9 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Spacing, BorderRadius, Typography, GameModeConfig, GameMode } from '../../src/theme/theme';
+import { Colors, Spacing, BorderRadius, GameModeConfig, GameMode } from '../../src/theme/theme';
 import { useUserStore } from '../../src/store/userStore';
 import { getXPProgress } from '../../src/engine/Scoring';
-import { getDailyChallenge } from '../../src/engine/GameEngine';
 import { getDailyApi } from '../../src/api/gameApi';
 
 const { width } = Dimensions.get('window');
@@ -15,7 +14,6 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen() {
   const router = useRouter();
   const {
-    username,
     xp,
     level,
     gamesPlayed,
@@ -24,53 +22,40 @@ export default function HomeScreen() {
     isLoaded,
     token,
   } = useUserStore();
-  const [daily, setDaily] = useState(() => {
-    const fallback = getDailyChallenge();
-    return {
-      letter: fallback.letter,
-      date: new Date().toISOString().split('T')[0],
-    };
-  });
+  const [daily, setDaily] = useState<{ letter: string; date: string } | null>(null);
+  const [dailyError, setDailyError] = useState<string | null>(null);
+  const [isDailyLoading, setIsDailyLoading] = useState(true);
 
   const xpProgress = getXPProgress(xp);
-  const dailyPlayed = dailyPlayedDate === daily.date;
+  const dailyPlayed = daily ? dailyPlayedDate === daily.date : false;
+
+  const fetchDaily = async () => {
+    setIsDailyLoading(true);
+    setDailyError(null);
+    try {
+      const serverDaily = await getDailyApi();
+      setDaily({
+        letter: serverDaily.letter,
+        date: serverDaily.date,
+      });
+    } catch {
+      setDaily(null);
+      setDailyError('Daily challenge is unavailable right now.');
+    } finally {
+      setIsDailyLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!isLoaded) return;
-
-    let cancelled = false;
-
-    const fetchDaily = async () => {
-      try {
-        const serverDaily = await getDailyApi();
-        if (cancelled) return;
-
-        setDaily({
-          letter: serverDaily.letter,
-          date: serverDaily.date,
-        });
-      } catch {
-        if (cancelled) return;
-
-        const fallback = getDailyChallenge();
-        setDaily({
-          letter: fallback.letter,
-          date: new Date().toISOString().split('T')[0],
-        });
-      }
-    };
-
-    fetchDaily();
-
-    return () => {
-      cancelled = true;
-    };
+    void fetchDaily();
   }, [isLoaded, token]);
 
   const modes: GameMode[] = ['practice', 'ranked', 'daily', 'relax', 'hardcore'];
+  const dailyUnavailable = Boolean(dailyError) || !daily;
 
   const handlePlay = (mode: GameMode) => {
-    if (mode === 'daily' && dailyPlayed) return;
+    if (mode === 'daily' && (dailyPlayed || dailyUnavailable)) return;
     router.push(`/game/${mode}`);
   };
 
@@ -115,19 +100,38 @@ export default function HomeScreen() {
           style={[styles.dailyBanner, dailyPlayed && styles.dailyPlayed]}
           onPress={() => handlePlay('daily')}
           activeOpacity={0.8}
-          disabled={dailyPlayed}
+          disabled={dailyPlayed || dailyUnavailable || isDailyLoading}
         >
           <View style={styles.dailyLeft}>
             <Text style={styles.dailyEmoji}>📅</Text>
             <View>
               <Text style={styles.dailyTitle}>
-                {dailyPlayed ? 'Daily Complete ✓' : "Today's Challenge"}
+                {dailyPlayed
+                  ? 'Daily Complete ✓'
+                  : dailyUnavailable
+                    ? 'Daily Unavailable'
+                    : "Today's Challenge"}
               </Text>
-              <Text style={styles.dailyLetter}>Letter: {daily.letter}</Text>
+              <Text style={styles.dailyLetter}>
+                {isDailyLoading
+                  ? 'Loading daily challenge...'
+                  : daily
+                    ? `Letter: ${daily.letter}`
+                    : 'Please try again in a moment.'}
+              </Text>
             </View>
           </View>
-          {!dailyPlayed && <Text style={styles.dailyPlay}>PLAY →</Text>}
+          {!dailyUnavailable && !dailyPlayed && <Text style={styles.dailyPlay}>PLAY →</Text>}
         </TouchableOpacity>
+        {dailyUnavailable && !isDailyLoading && (
+          <TouchableOpacity
+            style={styles.dailyRetryBtn}
+            onPress={() => void fetchDaily()}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.dailyRetryText}>Retry Daily</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Game Modes */}
         <Text style={styles.sectionTitle}>Game Modes</Text>
@@ -260,6 +264,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
     color: Colors.accentOrange,
+  },
+  dailyRetryBtn: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginTop: -Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  dailyRetryText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.textSecondary,
   },
   sectionTitle: {
     fontSize: 18,
