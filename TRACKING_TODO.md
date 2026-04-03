@@ -119,7 +119,7 @@ REQ-ANTICHEAT-001 - Anti-cheat (paste/bot/time analysis)
 REQ-AI-VALIDATION-001 - AI answer validation service
 - Status: DONE
 - Evidence: `server/src/ai-validation/ai-validation.service.ts`, `server/src/ai-validation/providers/openai.provider.ts`, `server/src/ai-validation/providers/ollama.provider.ts`, `server/src/ai-validation/providers/gemini.provider.ts`
-- Commit: `9b1e7f5`
+- Commit: `1a1c687`
 
 REQ-GROWTH-001 - Invite friends + referral rewards
 - Status: TODO
