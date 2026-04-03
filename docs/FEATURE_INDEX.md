@@ -48,6 +48,7 @@ Fast file lookup for common tasks.
 - `server/src/ai-validation/providers/ai-validation-provider.ts`
 - `server/src/ai-validation/providers/openai.provider.ts`
 - `server/src/ai-validation/providers/ollama.provider.ts`
+- `server/src/ai-validation/providers/gemini.provider.ts`
 - `server/src/ai-validation/ai-validation.types.ts`
 
 ### Persistence and infra

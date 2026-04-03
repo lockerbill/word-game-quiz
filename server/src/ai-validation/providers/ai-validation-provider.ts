@@ -4,7 +4,7 @@ import type {
 } from '../ai-validation.types.js';
 
 export interface AiValidationProvider {
-  readonly name: 'openai' | 'ollama';
+  readonly name: 'openai' | 'ollama' | 'gemini';
   getModel(): string;
   validate(request: AiValidationRequest): Promise<AiProviderResult>;
 }

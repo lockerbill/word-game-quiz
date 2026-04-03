@@ -7,6 +7,7 @@ import type {
 } from './ai-validation.types.js';
 import { OpenAiValidationProvider } from './providers/openai.provider.js';
 import { OllamaValidationProvider } from './providers/ollama.provider.js';
+import { GeminiValidationProvider } from './providers/gemini.provider.js';
 import type { AiValidationProvider } from './providers/ai-validation-provider.js';
 
 @Injectable()
@@ -19,6 +20,7 @@ export class AiValidationService {
     private readonly redis: RedisService,
     private readonly openAiProvider: OpenAiValidationProvider,
     private readonly ollamaProvider: OllamaValidationProvider,
+    private readonly geminiProvider: GeminiValidationProvider,
   ) {}
 
   async validateUnknownAnswer(
@@ -72,7 +74,9 @@ export class AiValidationService {
         model,
       };
 
-      const ttlRaw = Number(process.env.AI_VALIDATION_CACHE_TTL_SECONDS || 604800);
+      const ttlRaw = Number(
+        process.env.AI_VALIDATION_CACHE_TTL_SECONDS || 604800,
+      );
       const ttl = Number.isFinite(ttlRaw) && ttlRaw > 0 ? ttlRaw : 604800;
       await this.redis.set(cacheKey, JSON.stringify(result), ttl);
       return result;
@@ -91,6 +95,9 @@ export class AiValidationService {
     ).toLowerCase();
     if (configured === 'ollama') {
       return this.ollamaProvider;
+    }
+    if (configured === 'gemini') {
+      return this.geminiProvider;
     }
     return this.openAiProvider;
   }

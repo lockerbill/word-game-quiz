@@ -36,7 +36,7 @@ Required variables in `server/.env`:
 Optional AI validation variables:
 
 - `AI_VALIDATION_ENABLED` (default: `true`)
-- `AI_VALIDATION_PROVIDER` (`openai` or `ollama`, default: `openai`)
+- `AI_VALIDATION_PROVIDER` (`openai`, `ollama`, or `gemini`, default: `openai`)
 - `AI_VALIDATION_TIMEOUT_MS` (default: `2500`)
 - `AI_VALIDATION_MIN_CONFIDENCE` (default: `0.70`)
 - `AI_VALIDATION_CACHE_TTL_SECONDS` (default: `604800`)
@@ -51,6 +51,31 @@ Ollama provider variables:
 
 - `OLLAMA_BASE_URL` (default: `http://localhost:11434`)
 - `OLLAMA_MODEL` (default: `llama3.1:8b`)
+
+Gemini provider variables (AI Studio key flow):
+
+- `GEMINI_API_KEY` (required when using `gemini` provider)
+- `GEMINI_MODEL` (default: `gemini-1.5-flash`)
+- `GEMINI_BASE_URL` (default: `https://generativelanguage.googleapis.com`)
+
+Provider switching examples (`server/.env`):
+
+```env
+# OpenAI (default)
+AI_VALIDATION_PROVIDER=openai
+OPENAI_API_KEY=your_openai_key
+
+# Ollama
+AI_VALIDATION_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.1:8b
+
+# Gemini (AI Studio)
+AI_VALIDATION_PROVIDER=gemini
+GEMINI_API_KEY=your_ai_studio_key
+GEMINI_MODEL=gemini-1.5-flash
+GEMINI_BASE_URL=https://generativelanguage.googleapis.com
+```
 
 Validation behavior:
 

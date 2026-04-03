@@ -89,7 +89,7 @@ REQ-VALIDATION-PIPELINE-001 - Answer validation pipeline
 - Status: PARTIAL
 - Current behavior:
   - Validates "starts with letter" + exact/fuzzy DB match first.
-  - Unknown/no-match answers are sent to server AI validation (`openai`/`ollama`) with Redis cache.
+  - Unknown/no-match answers are sent to server AI validation (`openai`/`ollama`/`gemini`) with Redis cache.
 - Evidence: `server/src/game-data/answer-validator.ts`, `server/src/game/game.service.ts`, `server/src/ai-validation/`, `app/game/results.tsx`
 - TODO:
   - Persist and display server validations in the app results (currently results come from local session).
@@ -118,7 +118,7 @@ REQ-ANTICHEAT-001 - Anti-cheat (paste/bot/time analysis)
 
 REQ-AI-VALIDATION-001 - AI answer validation service
 - Status: DONE
-- Evidence: `server/src/ai-validation/ai-validation.service.ts`, `server/src/ai-validation/providers/openai.provider.ts`, `server/src/ai-validation/providers/ollama.provider.ts`
+- Evidence: `server/src/ai-validation/ai-validation.service.ts`, `server/src/ai-validation/providers/openai.provider.ts`, `server/src/ai-validation/providers/ollama.provider.ts`, `server/src/ai-validation/providers/gemini.provider.ts`
 - Commit: `9b1e7f5`
 
 REQ-GROWTH-001 - Invite friends + referral rewards

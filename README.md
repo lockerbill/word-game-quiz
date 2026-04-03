@@ -41,6 +41,47 @@ npm run start:dev
 
 Server runs on `http://localhost:3000` by default.
 
+### AI validation provider switching
+
+The server supports three AI validation providers for unknown answers:
+
+- `openai` (default)
+- `ollama`
+- `gemini` (AI Studio key flow)
+
+Set these in `server/.env`:
+
+```env
+AI_VALIDATION_PROVIDER=openai
+```
+
+OpenAI:
+
+```env
+OPENAI_API_KEY=your_openai_key
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_BASE_URL=https://api.openai.com/v1
+```
+
+Ollama:
+
+```env
+AI_VALIDATION_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.1:8b
+```
+
+Gemini (AI Studio):
+
+```env
+AI_VALIDATION_PROVIDER=gemini
+GEMINI_API_KEY=your_ai_studio_key
+GEMINI_MODEL=gemini-1.5-flash
+GEMINI_BASE_URL=https://generativelanguage.googleapis.com
+```
+
+You can keep multiple provider variables in `.env`; only the selected `AI_VALIDATION_PROVIDER` is used.
+
 ### 3) Run the client app (Expo)
 
 In another terminal at the repository root:
