@@ -22,7 +22,7 @@ export class RedisService implements OnModuleDestroy {
         this.client = null;
       });
     }
-    return this.client!;
+    return this.client;
   }
 
   async get(key: string): Promise<string | null> {

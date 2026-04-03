@@ -12,7 +12,8 @@ import { User } from '../entities/user.entity';
     TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'alpha-bucks-secret-key-change-in-production',
+      secret:
+        process.env.JWT_SECRET || 'alpha-bucks-secret-key-change-in-production',
       signOptions: { expiresIn: '30d' },
     }),
   ],

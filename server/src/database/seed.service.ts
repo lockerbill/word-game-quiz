@@ -57,9 +57,7 @@ export class SeedService implements OnApplicationBootstrap {
   private async seedAnswers() {
     const existing = await this.answerRepo.count();
     if (existing > 0) {
-      this.logger.log(
-        `Answers already seeded (${existing} rows). Skipping.`,
-      );
+      this.logger.log(`Answers already seeded (${existing} rows). Skipping.`);
       return;
     }
 
@@ -77,8 +75,7 @@ export class SeedService implements OnApplicationBootstrap {
       const categoryId = categoryMap.get(categoryName);
       if (!categoryId) continue;
 
-      const rows: { categoryId: number; letter: string; answer: string }[] =
-        [];
+      const rows: { categoryId: number; letter: string; answer: string }[] = [];
       for (const [letter, answers] of Object.entries(letterMap)) {
         for (const answer of answers) {
           rows.push({ categoryId, letter: letter.toUpperCase(), answer });
