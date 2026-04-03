@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Game } from '../entities/game.entity.js';
@@ -17,6 +21,8 @@ import {
   getLevelFromXP,
   type ScoreResult,
 } from '../game-data/scoring.js';
+import { AiValidationService } from '../ai-validation/ai-validation.service.js';
+import type { ValidationReason } from '../ai-validation/ai-validation.types.js';
 
 // In-memory pending games (could be Redis for multi-server)
 interface PendingGame {
@@ -54,6 +60,7 @@ export class GameService {
     private categoryRepo: Repository<Category>,
     @InjectRepository(Answer)
     private answerRepo: Repository<Answer>,
+    private aiValidationService: AiValidationService,
   ) {}
 
   async startGame(userId: string, dto: StartGameDto) {
@@ -116,6 +123,8 @@ export class GameService {
       answer: string;
       valid: boolean;
       confidence: number;
+      reason: ValidationReason;
+      provider: string | null;
     }[] = [];
 
     const categoryIds = pending.categories.map((c) => c.id);
@@ -139,12 +148,32 @@ export class GameService {
 
       const knownAnswers = answerMap.get(cat.id) || [];
       const result = validateAnswer(pending.letter, userAnswer, knownAnswers);
+      let finalValid = result.valid;
+      let finalConfidence = result.confidence;
+      let finalReason: ValidationReason = result.reason;
+      let finalProvider: string | null = null;
+
+      if (result.reason === 'no_match' && userAnswer.trim()) {
+        const aiResult = await this.aiValidationService.validateUnknownAnswer({
+          letter: pending.letter,
+          categoryName: cat.name,
+          answer: userAnswer,
+          knownAnswers,
+        });
+        finalValid = aiResult.valid;
+        finalConfidence = aiResult.confidence;
+        finalReason = aiResult.reason;
+        finalProvider = aiResult.provider;
+      }
+
       validations.push({
         categoryId: cat.id,
         categoryName: cat.name,
         answer: userAnswer,
-        valid: result.valid,
-        confidence: result.confidence,
+        valid: finalValid,
+        confidence: finalConfidence,
+        reason: finalReason,
+        provider: finalProvider,
       });
     }
 
@@ -196,6 +225,8 @@ export class GameService {
         answer: v.answer,
         valid: v.valid,
         confidence: v.confidence,
+        reason: v.reason,
+        provider: v.provider,
       })),
     };
   }
@@ -252,7 +283,9 @@ export class GameService {
       .getMany();
 
     if (categories.length < 10) {
-      throw new NotFoundException('Not enough categories with answers in database');
+      throw new NotFoundException(
+        'Not enough categories with answers in database',
+      );
     }
 
     return categories;
@@ -290,7 +323,9 @@ export class GameService {
     const categories = shuffled.slice(0, 10);
 
     if (categories.length < 10) {
-      throw new NotFoundException('Not enough categories with answers in database');
+      throw new NotFoundException(
+        'Not enough categories with answers in database',
+      );
     }
 
     return { letter, categories };
@@ -305,9 +340,7 @@ export class GameService {
   }
 
   private generateId(): string {
-    return (
-      Date.now().toString(36) + Math.random().toString(36).substr(2, 9)
-    );
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
   }
 
   private async updateUserStats(

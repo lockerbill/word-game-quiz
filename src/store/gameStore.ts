@@ -147,7 +147,8 @@ export const useGameStore = create<GameState>((set, get) => ({
             valid: item.valid,
             confidence: item.confidence,
             matchedAnswer: null,
-            reason: item.valid ? 'fuzzy_match' : 'no_match',
+            provider: item.provider ?? null,
+            reason: item.reason || (item.valid ? 'fuzzy_match' : 'no_match'),
           };
           return acc;
         }, {} as Record<number, ValidationResult>),

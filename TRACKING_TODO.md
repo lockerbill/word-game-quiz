@@ -88,11 +88,10 @@ REQ-GAME-DAILY-001 - Daily challenge (same letter + categories for everyone)
 REQ-VALIDATION-PIPELINE-001 - Answer validation pipeline
 - Status: PARTIAL
 - Current behavior:
-  - Validates "starts with letter" + exact/fuzzy match against a small curated answer list.
-  - If no answers exist for a category+letter, validation is lenient (accepts as valid with 0.5 confidence).
-- Evidence: `server/src/game-data/answer-validator.ts`, `server/src/game/game.service.ts`, `app/game/results.tsx`
+  - Validates "starts with letter" + exact/fuzzy DB match first.
+  - Unknown/no-match answers are sent to server AI validation (`openai`/`ollama`) with Redis cache.
+- Evidence: `server/src/game-data/answer-validator.ts`, `server/src/game/game.service.ts`, `server/src/ai-validation/`, `app/game/results.tsx`
 - TODO:
-  - Replace lenient fallback with a stronger approach (AI validation or stricter rules).
   - Persist and display server validations in the app results (currently results come from local session).
 
 REQ-OFFLINE-001 - Offline practice
@@ -118,7 +117,8 @@ REQ-ANTICHEAT-001 - Anti-cheat (paste/bot/time analysis)
 - Status: TODO
 
 REQ-AI-VALIDATION-001 - AI answer validation service
-- Status: TODO
+- Status: DONE
+- Evidence: `server/src/ai-validation/ai-validation.service.ts`, `server/src/ai-validation/providers/openai.provider.ts`, `server/src/ai-validation/providers/ollama.provider.ts`
 
 REQ-GROWTH-001 - Invite friends + referral rewards
 - Status: TODO
@@ -184,8 +184,8 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
 
 ### P3 - AI validation (incremental)
 
-- TODO-P3-001 - Add a server-side validation interface with pluggable backends
-- TODO-P3-002 - Implement AI validator + cache results
+- DONE-P3-001 - Add a server-side validation interface with pluggable backends
+- DONE-P3-002 - Implement AI validator + cache results
 
 ### P4+ - Growth / Multiplayer / Admin / Analytics
 

@@ -19,7 +19,12 @@ export function validateAnswer(
 
   // Empty check
   if (!trimmed) {
-    return { valid: false, confidence: 0, matchedAnswer: null, reason: 'empty' };
+    return {
+      valid: false,
+      confidence: 0,
+      matchedAnswer: null,
+      reason: 'empty',
+    };
   }
 
   // Letter check
@@ -62,15 +67,10 @@ export function validateAnswer(
     }
   }
 
-  // If we don't have answers for this category, be lenient
-  if (knownAnswers.length === 0) {
-    return {
-      valid: true,
-      confidence: 0.5,
-      matchedAnswer: trimmed,
-      reason: 'fuzzy_match',
-    };
-  }
-
-  return { valid: false, confidence: 0, matchedAnswer: null, reason: 'no_match' };
+  return {
+    valid: false,
+    confidence: 0,
+    matchedAnswer: null,
+    reason: 'no_match',
+  };
 }

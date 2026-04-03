@@ -6,6 +6,36 @@ import { Colors, Spacing, BorderRadius, GameModeConfig } from '../../src/theme/t
 import { useGameStore } from '../../src/store/gameStore';
 import { useUserStore } from '../../src/store/userStore';
 
+function getReasonLabel(reason?: string): string {
+  switch (reason) {
+    case 'exact_match':
+      return 'Exact match';
+    case 'fuzzy_match':
+      return 'Close match';
+    case 'wrong_letter':
+      return 'Wrong starting letter';
+    case 'empty':
+      return 'Skipped';
+    case 'ai_validated':
+      return 'AI validated';
+    case 'ai_rejected':
+      return 'AI rejected';
+    case 'ai_error':
+      return 'AI unavailable';
+    default:
+      return 'No match';
+  }
+}
+
+function getValidationMeta(reason?: string, provider?: string | null): string {
+  const label = getReasonLabel(reason);
+  if (!provider || !reason?.startsWith('ai_')) {
+    return label;
+  }
+
+  return `${label} (${provider})`;
+}
+
 export default function ResultsScreen() {
   const router = useRouter();
   const { session, submissionStatus, resetGame } = useGameStore();
@@ -76,6 +106,10 @@ export default function ResultsScreen() {
   const scorePercentage = score.correctCount / score.totalQuestions;
   const resultEmoji = scorePercentage === 1 ? '🏆' : scorePercentage >= 0.7 ? '🎉' : scorePercentage >= 0.4 ? '👍' : '💪';
   const resultText = scorePercentage === 1 ? 'PERFECT!' : scorePercentage >= 0.7 ? 'Great Job!' : scorePercentage >= 0.4 ? 'Not Bad!' : 'Keep Trying!';
+  const validationList = Object.values(session.validations);
+  const aiValidatedCount = validationList.filter((item) => item.reason === 'ai_validated').length;
+  const deterministicCount = validationList.filter((item) => item.reason === 'exact_match' || item.reason === 'fuzzy_match').length;
+  const rejectedCount = validationList.filter((item) => !item.valid && item.reason !== 'empty').length;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -147,6 +181,25 @@ export default function ResultsScreen() {
 
         {/* Answer Breakdown */}
         <Text style={styles.sectionTitle}>Answer Breakdown</Text>
+        <View style={styles.insightsCard}>
+          <Text style={styles.insightsTitle}>Validation Insights</Text>
+          <View style={styles.insightsRow}>
+            <View style={styles.insightItem}>
+              <Text style={styles.insightValue}>{aiValidatedCount}</Text>
+              <Text style={styles.insightLabel}>AI Validated</Text>
+            </View>
+            <View style={styles.insightDivider} />
+            <View style={styles.insightItem}>
+              <Text style={styles.insightValue}>{deterministicCount}</Text>
+              <Text style={styles.insightLabel}>Deterministic</Text>
+            </View>
+            <View style={styles.insightDivider} />
+            <View style={styles.insightItem}>
+              <Text style={styles.insightValue}>{rejectedCount}</Text>
+              <Text style={styles.insightLabel}>Rejected</Text>
+            </View>
+          </View>
+        </View>
         <View style={styles.breakdownCard}>
           <View style={styles.letterBanner}>
             <Text style={styles.letterBannerText}>Letter: {session.letter}</Text>
@@ -163,6 +216,7 @@ export default function ResultsScreen() {
                   <Text style={[styles.brkAnswer, valid ? styles.brkValid : styles.brkInvalid]}>
                     {answer || '(skipped)'}
                   </Text>
+                  <Text style={styles.brkMeta}>{getValidationMeta(v?.reason, v?.provider)}</Text>
                 </View>
                 <Text style={styles.brkStatus}>{valid ? '✅' : answer ? '❌' : '⏭️'}</Text>
               </View>
@@ -252,6 +306,28 @@ const styles = StyleSheet.create({
   achieveName: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
   achieveDesc: { fontSize: 12, color: Colors.textTertiary },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary, marginBottom: Spacing.sm },
+  insightsCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  insightsTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+    marginBottom: Spacing.sm,
+  },
+  insightsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  insightItem: { flex: 1, alignItems: 'center' },
+  insightValue: { fontSize: 22, fontWeight: '800', color: Colors.textPrimary },
+  insightLabel: { fontSize: 11, color: Colors.textTertiary, marginTop: 2 },
+  insightDivider: { width: 1, height: 28, backgroundColor: Colors.glassBorder },
   breakdownCard: {
     backgroundColor: Colors.surface, borderRadius: BorderRadius.lg,
     overflow: 'hidden', marginBottom: Spacing.lg,
@@ -269,6 +345,7 @@ const styles = StyleSheet.create({
   brkContent: { flex: 1 },
   brkCat: { fontSize: 12, color: Colors.textTertiary, fontWeight: '500' },
   brkAnswer: { fontSize: 15, fontWeight: '600', marginTop: 1 },
+  brkMeta: { fontSize: 11, color: Colors.textTertiary, marginTop: 2 },
   brkValid: { color: Colors.correctAnswer },
   brkInvalid: { color: Colors.wrongAnswer },
   brkStatus: { fontSize: 18, marginLeft: 8 },

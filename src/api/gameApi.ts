@@ -31,6 +31,16 @@ export interface GameSubmitResponse {
     answer: string;
     valid: boolean;
     confidence: number;
+    reason?:
+      | 'exact_match'
+      | 'fuzzy_match'
+      | 'no_match'
+      | 'wrong_letter'
+      | 'empty'
+      | 'ai_validated'
+      | 'ai_rejected'
+      | 'ai_error';
+    provider?: string | null;
   }[];
 }
 
