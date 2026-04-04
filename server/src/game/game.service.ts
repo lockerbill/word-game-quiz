@@ -277,7 +277,10 @@ export class GameService {
         'category.difficulty',
         'category.emoji',
       ])
-      .distinct(true)
+      .groupBy('category.id')
+      .addGroupBy('category.name')
+      .addGroupBy('category.difficulty')
+      .addGroupBy('category.emoji')
       .orderBy('RANDOM()')
       .limit(10)
       .getMany();
