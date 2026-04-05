@@ -28,7 +28,7 @@ export class AdminAuditLog {
   @Column({ name: 'target_type', length: 50 })
   targetType: string;
 
-  @Column({ name: 'target_id', length: 100, nullable: true })
+  @Column({ name: 'target_id', type: 'varchar', length: 100, nullable: true })
   targetId: string | null;
 
   @Column({ type: 'text', nullable: true })
