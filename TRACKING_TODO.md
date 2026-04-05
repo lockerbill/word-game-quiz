@@ -241,6 +241,7 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
   - Added admin settings endpoints for current settings, revision history, publish update, and rollback.
   - Wired runtime settings consumption into game mode timer/category selection and AI validation behavior.
   - Evidence: `server/src/admin-settings/admin-settings.module.ts`, `server/src/admin-settings/admin-settings.controller.ts`, `server/src/admin-settings/admin-settings.service.ts`, `server/src/entities/admin-settings-revision.entity.ts`
+  - Commit: `e65dd38`
 
 ### P2 - Anti-cheat (MVP)
 
