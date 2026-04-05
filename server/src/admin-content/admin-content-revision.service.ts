@@ -8,10 +8,7 @@ import { Repository } from 'typeorm';
 import { AdminAuditLogService } from '../admin/admin-audit-log.service.js';
 import { Answer } from '../entities/answer.entity.js';
 import { Category } from '../entities/category.entity.js';
-import {
-  ContentRevision,
-  type ContentRevisionStatus,
-} from '../entities/content-revision.entity.js';
+import { ContentRevision } from '../entities/content-revision.entity.js';
 import type { User } from '../entities/user.entity.js';
 import { CreateContentRevisionDraftDto } from './dto/create-content-revision-draft.dto.js';
 import { ListContentRevisionsQueryDto } from './dto/list-content-revisions-query.dto.js';

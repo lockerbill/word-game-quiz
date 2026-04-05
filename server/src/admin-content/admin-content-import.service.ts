@@ -506,6 +506,16 @@ export class AdminContentImportService {
       return 1;
     }
 
+    if (
+      typeof value !== 'string' &&
+      typeof value !== 'number' &&
+      typeof value !== 'boolean'
+    ) {
+      throw new BadRequestException(
+        'difficulty must be an integer between 1 and 5',
+      );
+    }
+
     const parsed = Number.parseInt(String(value), 10);
     if (!Number.isFinite(parsed) || parsed < 1 || parsed > 5) {
       throw new BadRequestException(
@@ -519,6 +529,14 @@ export class AdminContentImportService {
   private parseEnabled(value: unknown): boolean {
     if (typeof value === 'undefined' || value === null || value === '') {
       return true;
+    }
+
+    if (
+      typeof value !== 'string' &&
+      typeof value !== 'number' &&
+      typeof value !== 'boolean'
+    ) {
+      throw new BadRequestException('enabled must be true/false');
     }
 
     const normalized = String(value).trim().toLowerCase();
@@ -535,6 +553,14 @@ export class AdminContentImportService {
   private normalizeEmoji(value: unknown): string {
     if (typeof value === 'undefined' || value === null || value === '') {
       return '📝';
+    }
+
+    if (
+      typeof value !== 'string' &&
+      typeof value !== 'number' &&
+      typeof value !== 'boolean'
+    ) {
+      throw new BadRequestException('emoji must be a string');
     }
 
     const emoji = this.normalizeSpaces(String(value), 'emoji');

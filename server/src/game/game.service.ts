@@ -223,7 +223,7 @@ export class GameService {
     await this.gameAnswerRepo.save(gameAnswers);
 
     // Update user stats
-    await this.updateUserStats(userId, score, pending.mode);
+    await this.updateUserStats(userId, score);
 
     return {
       gameId: savedGame.id,
@@ -371,7 +371,6 @@ export class GameService {
   private async updateUserStats(
     userId: string,
     score: ScoreResult,
-    mode: string,
   ): Promise<void> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) return;

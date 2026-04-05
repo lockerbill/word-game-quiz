@@ -24,6 +24,11 @@ interface AdminActor {
   role: User['role'];
 }
 
+interface CategoryAnswerCountRow {
+  category_id: number | string;
+  answercount: number | string | null;
+}
+
 @Injectable()
 export class AdminContentService {
   constructor(
@@ -77,7 +82,8 @@ export class AdminContentService {
     ]);
 
     const answerCountByCategoryId = new Map<number, number>();
-    for (const raw of rows.raw) {
+    const rawRows = rows.raw as CategoryAnswerCountRow[];
+    for (const raw of rawRows) {
       const categoryId = Number(raw.category_id);
       const answerCount = Number(raw.answercount ?? 0);
       answerCountByCategoryId.set(categoryId, answerCount);

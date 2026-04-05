@@ -7,10 +7,25 @@ import { RolesGuard } from '../auth/roles.guard';
 import { AdminUsersController } from './admin-users.controller';
 import { AdminUsersService } from './admin-users.service';
 
+interface MockRequest {
+  headers: Record<string, string | undefined>;
+  user?: {
+    id: string;
+    role: string;
+    accountStatus: string;
+  };
+}
+
+interface MockGuardContext {
+  switchToHttp: () => {
+    getRequest: () => MockRequest;
+  };
+}
+
 jest.mock('@nestjs/passport', () => ({
   AuthGuard: () =>
     class MockAuthGuard {
-      canActivate(context: { switchToHttp: () => { getRequest: () => any } }) {
+      canActivate(context: MockGuardContext) {
         const req = context.switchToHttp().getRequest();
         const roleHeader = req.headers['x-role'];
         const statusHeader = req.headers['x-status'];
@@ -33,7 +48,7 @@ jest.mock('@nestjs/passport', () => ({
 describe('AdminUsersController', () => {
   let app: INestApplication;
 
-  const listUsers = jest.fn(async () => ({
+  const listUsers = jest.fn(() => ({
     page: 1,
     limit: 20,
     total: 1,
@@ -51,7 +66,7 @@ describe('AdminUsersController', () => {
       },
     ],
   }));
-  const updateUserRole = jest.fn(async () => ({
+  const updateUserRole = jest.fn(() => ({
     id: 'u-1',
     username: 'alice',
     email: 'alice@example.com',
@@ -62,7 +77,7 @@ describe('AdminUsersController', () => {
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     updatedAt: new Date('2026-01-02T00:00:00.000Z'),
   }));
-  const updateUserStatus = jest.fn(async () => ({
+  const updateUserStatus = jest.fn(() => ({
     id: 'u-1',
     username: 'alice',
     email: 'alice@example.com',
@@ -111,8 +126,10 @@ describe('AdminUsersController', () => {
     jest.clearAllMocks();
   });
 
+  const httpServer = () => app.getHttpServer() as Parameters<typeof request>[0];
+
   it('allows admin role to list users', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .get('/admin/users')
       .set('x-role', 'admin')
       .expect(200);
@@ -121,7 +138,7 @@ describe('AdminUsersController', () => {
   });
 
   it('denies player role for admin-users route', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .get('/admin/users')
       .set('x-role', 'player')
       .expect(403);
@@ -130,7 +147,7 @@ describe('AdminUsersController', () => {
   });
 
   it('denies suspended user for admin-users route', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .get('/admin/users')
       .set('x-role', 'admin')
       .set('x-status', 'suspended')
@@ -140,7 +157,7 @@ describe('AdminUsersController', () => {
   });
 
   it('validates update role payload and rejects short reason', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .patch('/admin/users/u-1/role')
       .set('x-role', 'admin')
       .send({ role: 'admin', reason: 'bad' })
@@ -150,7 +167,7 @@ describe('AdminUsersController', () => {
   });
 
   it('accepts valid role update and forwards actor + payload', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .patch('/admin/users/u-1/role')
       .set('x-role', 'admin')
       .send({ role: 'moderator', reason: 'Promote for queue triage duties' })
@@ -171,7 +188,7 @@ describe('AdminUsersController', () => {
   });
 
   it('validates update status payload and rejects missing reason', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .patch('/admin/users/u-1/status')
       .set('x-role', 'admin')
       .send({ accountStatus: 'suspended' })
@@ -181,7 +198,7 @@ describe('AdminUsersController', () => {
   });
 
   it('accepts valid status update and forwards actor + payload', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .patch('/admin/users/u-1/status')
       .set('x-role', 'admin')
       .send({

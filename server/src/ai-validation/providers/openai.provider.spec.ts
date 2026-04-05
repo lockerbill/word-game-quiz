@@ -4,6 +4,17 @@ describe('OpenAiValidationProvider', () => {
   const originalEnv = process.env;
   const originalFetch = global.fetch;
 
+  const setFetchMock = (payload: unknown) => {
+    const fetchMock = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(payload),
+      } as Response),
+    );
+
+    global.fetch = fetchMock as typeof fetch;
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     process.env = { ...originalEnv };
@@ -16,18 +27,15 @@ describe('OpenAiValidationProvider', () => {
   });
 
   it('parses JSON content from model response', async () => {
-    global.fetch = jest.fn(async () => ({
-      ok: true,
-      json: async () => ({
-        choices: [
-          {
-            message: {
-              content: 'Result: {"valid": true, "confidence": 0.93}',
-            },
+    setFetchMock({
+      choices: [
+        {
+          message: {
+            content: 'Result: {"valid": true, "confidence": 0.93}',
           },
-        ],
-      }),
-    })) as any;
+        },
+      ],
+    });
 
     const provider = new OpenAiValidationProvider();
     const result = await provider.validate({
@@ -41,12 +49,9 @@ describe('OpenAiValidationProvider', () => {
   });
 
   it('throws when response is malformed JSON content', async () => {
-    global.fetch = jest.fn(async () => ({
-      ok: true,
-      json: async () => ({
-        choices: [{ message: { content: 'not-json' } }],
-      }),
-    })) as any;
+    setFetchMock({
+      choices: [{ message: { content: 'not-json' } }],
+    });
 
     const provider = new OpenAiValidationProvider();
     await expect(

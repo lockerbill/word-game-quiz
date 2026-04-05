@@ -10,9 +10,11 @@ describe('AdminContentRevisionService', () => {
   const actor = { id: 'admin-1', role: 'admin' as const };
 
   const createService = (revision: ContentRevision) => {
+    const save = jest.fn((row: ContentRevision) => row);
+
     const revisionRepo = {
-      findOne: jest.fn(async () => revision),
-      save: jest.fn(async (row: ContentRevision) => row),
+      findOne: jest.fn(() => revision),
+      save,
       createQueryBuilder: jest.fn().mockReturnValue({
         orderBy: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
@@ -58,7 +60,7 @@ describe('AdminContentRevisionService', () => {
       audit,
     );
 
-    return { service, revisionRepo };
+    return { service, save };
   };
 
   it('rejects submit for review when revision is not draft', async () => {
@@ -110,13 +112,13 @@ describe('AdminContentRevisionService', () => {
       updatedAt: new Date(),
     } as unknown as ContentRevision;
 
-    const { service, revisionRepo } = createService(revision);
+    const { service, save } = createService(revision);
 
     const result = await service.publishRevision(actor, 'rev-2', {
       reason: 'QA approved publish',
     });
 
     expect(result.status).toBe('published');
-    expect(revisionRepo.save).toHaveBeenCalled();
+    expect(save).toHaveBeenCalled();
   });
 });

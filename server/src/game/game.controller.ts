@@ -1,20 +1,18 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
-  ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { GameService } from './game.service.js';
 import { StartGameDto, SubmitGameDto } from './dto/game.dto.js';
+import type { User } from '../entities/user.entity.js';
+
+interface GameRequest {
+  user: Pick<User, 'id'>;
+}
 
 @ApiTags('game')
 @ApiBearerAuth('JWT')
@@ -30,7 +28,7 @@ export class GameController {
       'Returns gameId, letter, categories, and timerDuration. Store the gameId to submit answers.',
   })
   @ApiResponse({ status: 201, description: 'Game session created' })
-  start(@Request() req: any, @Body() dto: StartGameDto) {
+  start(@Req() req: GameRequest, @Body() dto: StartGameDto) {
     return this.gameService.startGame(req.user.id, dto);
   }
 
@@ -48,7 +46,7 @@ export class GameController {
     status: 404,
     description: 'Game session not found or expired (5 min TTL)',
   })
-  submit(@Request() req: any, @Body() dto: SubmitGameDto) {
+  submit(@Req() req: GameRequest, @Body() dto: SubmitGameDto) {
     return this.gameService.submitGame(req.user.id, dto);
   }
 

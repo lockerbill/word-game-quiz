@@ -5,6 +5,17 @@ import { User } from '../entities/user.entity.js';
 import { Game } from '../entities/game.entity.js';
 import { getLevelFromXP, LEVEL_THRESHOLDS } from '../game-data/scoring.js';
 
+interface AverageScoreRow {
+  avg: string | null;
+}
+
+interface ModeStatsRow {
+  mode: string;
+  count: string;
+  best: string;
+  avg: string | null;
+}
+
 @Injectable()
 export class UserService {
   constructor(
@@ -53,7 +64,7 @@ export class UserService {
       .createQueryBuilder('game')
       .select('AVG(game.score)', 'avg')
       .where('game.userId = :userId', { userId })
-      .getRawOne();
+      .getRawOne<AverageScoreRow>();
 
     // Mode breakdown
     const modeStats = await this.gameRepo
@@ -64,7 +75,7 @@ export class UserService {
       .addSelect('AVG(game.score)', 'avg')
       .where('game.userId = :userId', { userId })
       .groupBy('game.mode')
-      .getRawMany();
+      .getRawMany<ModeStatsRow>();
 
     return {
       level: user.level,
@@ -79,10 +90,10 @@ export class UserService {
       perfectGames: user.perfectGames,
       currentStreak: user.currentStreak,
       longestStreak: user.longestStreak,
-      modeStats: modeStats.map((m: any) => ({
+      modeStats: modeStats.map((m) => ({
         mode: m.mode,
-        gamesPlayed: parseInt(m.count, 10),
-        bestScore: parseInt(m.best, 10),
+        gamesPlayed: Number.parseInt(m.count, 10),
+        bestScore: Number.parseInt(m.best, 10),
         averageScore: Math.round(parseFloat(m.avg || '0')),
       })),
     };

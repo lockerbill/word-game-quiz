@@ -4,6 +4,17 @@ describe('OllamaValidationProvider', () => {
   const originalEnv = process.env;
   const originalFetch = global.fetch;
 
+  const setFetchMock = (payload: unknown) => {
+    const fetchMock = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(payload),
+      } as Response),
+    );
+
+    global.fetch = fetchMock as typeof fetch;
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     process.env = { ...originalEnv };
@@ -15,12 +26,7 @@ describe('OllamaValidationProvider', () => {
   });
 
   it('parses strict JSON response payload', async () => {
-    global.fetch = jest.fn(async () => ({
-      ok: true,
-      json: async () => ({
-        response: '{"valid": false, "confidence": 0.21}',
-      }),
-    })) as any;
+    setFetchMock({ response: '{"valid": false, "confidence": 0.21}' });
 
     const provider = new OllamaValidationProvider();
     const result = await provider.validate({
@@ -34,10 +40,7 @@ describe('OllamaValidationProvider', () => {
   });
 
   it('throws when Ollama response field is not valid JSON', async () => {
-    global.fetch = jest.fn(async () => ({
-      ok: true,
-      json: async () => ({ response: 'invalid-json' }),
-    })) as any;
+    setFetchMock({ response: 'invalid-json' });
 
     const provider = new OllamaValidationProvider();
     await expect(

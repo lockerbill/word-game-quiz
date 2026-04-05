@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
@@ -8,6 +8,11 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, UpgradeGuestDto } from './dto/auth.dto';
+import type { User } from '../entities/user.entity';
+
+interface AuthenticatedRequest {
+  user: Pick<User, 'id'>;
+}
 
 @ApiTags('auth')
 @Controller('auth')
@@ -58,7 +63,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 400, description: 'Account is not a guest' })
   @ApiResponse({ status: 409, description: 'Email or username already exists' })
-  upgrade(@Request() req, @Body() dto: UpgradeGuestDto) {
+  upgrade(@Req() req: AuthenticatedRequest, @Body() dto: UpgradeGuestDto) {
     return this.authService.upgrade(req.user.id, dto);
   }
 }

@@ -7,10 +7,25 @@ import { RolesGuard } from '../auth/roles.guard';
 import { AdminSettingsController } from './admin-settings.controller';
 import { AdminSettingsService } from './admin-settings.service';
 
+interface MockRequest {
+  headers: Record<string, string | undefined>;
+  user?: {
+    id: string;
+    role: string;
+    accountStatus: string;
+  };
+}
+
+interface MockGuardContext {
+  switchToHttp: () => {
+    getRequest: () => MockRequest;
+  };
+}
+
 jest.mock('@nestjs/passport', () => ({
   AuthGuard: () =>
     class MockAuthGuard {
-      canActivate(context: { switchToHttp: () => { getRequest: () => any } }) {
+      canActivate(context: MockGuardContext) {
         const req = context.switchToHttp().getRequest();
         const roleHeader = req.headers['x-role'];
         const statusHeader = req.headers['x-status'];
@@ -30,7 +45,7 @@ jest.mock('@nestjs/passport', () => ({
 describe('AdminSettingsController', () => {
   let app: INestApplication;
 
-  const getCurrentSettings = jest.fn(async () => ({
+  const getCurrentSettings = jest.fn(() => ({
     version: 2,
     settings: {
       game: {
@@ -53,21 +68,21 @@ describe('AdminSettingsController', () => {
       features: {},
     },
   }));
-  const listRevisions = jest.fn(async () => ({
+  const listRevisions = jest.fn(() => ({
     page: 1,
     limit: 20,
     total: 0,
     data: [],
   }));
-  const getRevision = jest.fn(async () => ({
+  const getRevision = jest.fn(() => ({
     id: '7e50f0fa-9155-429e-bb8f-6fddfabdb08b',
     version: 1,
   }));
-  const updateSettings = jest.fn(async () => ({
+  const updateSettings = jest.fn(() => ({
     revisionId: 'new-rev',
     version: 3,
   }));
-  const rollbackSettings = jest.fn(async () => ({
+  const rollbackSettings = jest.fn(() => ({
     appliedRevision: { id: 'rb', version: 4 },
   }));
 
@@ -110,8 +125,10 @@ describe('AdminSettingsController', () => {
     jest.clearAllMocks();
   });
 
+  const httpServer = () => app.getHttpServer() as Parameters<typeof request>[0];
+
   it('allows admin to access current settings', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .get('/admin/settings/current')
       .set('x-role', 'admin')
       .expect(200);
@@ -120,7 +137,7 @@ describe('AdminSettingsController', () => {
   });
 
   it('denies player for admin-settings route', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .get('/admin/settings/current')
       .set('x-role', 'player')
       .expect(403);
@@ -129,7 +146,7 @@ describe('AdminSettingsController', () => {
   });
 
   it('denies suspended admin for admin-settings route', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .get('/admin/settings/current')
       .set('x-role', 'admin')
       .set('x-status', 'suspended')
@@ -139,7 +156,7 @@ describe('AdminSettingsController', () => {
   });
 
   it('validates update payload expectedVersion and reason', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .patch('/admin/settings')
       .set('x-role', 'admin')
       .send({
@@ -157,7 +174,7 @@ describe('AdminSettingsController', () => {
   });
 
   it('accepts valid settings update payload', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .patch('/admin/settings')
       .set('x-role', 'admin')
       .send({
@@ -190,7 +207,7 @@ describe('AdminSettingsController', () => {
   });
 
   it('validates rollback payload', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .post('/admin/settings/rollback')
       .set('x-role', 'admin')
       .send({
@@ -204,7 +221,7 @@ describe('AdminSettingsController', () => {
   });
 
   it('accepts valid rollback payload', async () => {
-    await request(app.getHttpServer())
+    await request(httpServer())
       .post('/admin/settings/rollback')
       .set('x-role', 'admin')
       .send({

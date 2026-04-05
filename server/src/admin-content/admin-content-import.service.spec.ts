@@ -9,11 +9,13 @@ describe('AdminContentImportService', () => {
   const actor = { id: 'admin-1', role: 'admin' as const };
 
   const createService = () => {
+    const save = jest.fn((row: ContentImportJob) => ({
+      ...row,
+      id: 'job-1',
+    }));
+
     const importJobRepo = {
-      save: jest.fn(async (row: ContentImportJob) => ({
-        ...row,
-        id: 'job-1',
-      })),
+      save,
       createQueryBuilder: jest.fn(),
       findOne: jest.fn(),
     } as unknown as Repository<ContentImportJob>;
@@ -43,11 +45,12 @@ describe('AdminContentImportService', () => {
       ),
       importJobRepo,
       adminAuditLogService,
+      save,
     };
   };
 
   it('creates validated import job from CSV payload', async () => {
-    const { service, importJobRepo } = createService();
+    const { service, save } = createService();
 
     const result = await service.createImportJob(actor, {
       format: 'csv',
@@ -65,7 +68,7 @@ describe('AdminContentImportService', () => {
         errorCount: 0,
       }),
     );
-    expect(importJobRepo.save).toHaveBeenCalledTimes(1);
+    expect(save).toHaveBeenCalledTimes(1);
   });
 
   it('marks import job as failed_validation when row is invalid', async () => {

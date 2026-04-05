@@ -3,7 +3,19 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { AppModule } from './app.module.js';
+
+interface CorsRequestLike {
+  method?: string;
+  path?: string;
+  url?: string;
+  headers: {
+    origin?: string | string[];
+  };
+}
+
+type CorsOptionsCallback = (err: Error | null, options?: CorsOptions) => void;
 
 function parseOriginList(value: string | undefined): string[] {
   return (value ?? '')
@@ -22,7 +34,7 @@ async function bootstrap() {
   const publicCorsOrigins = parseOriginList(publicCorsOrigin);
   const adminCorsOrigins = parseOriginList(process.env.ADMIN_CORS_ORIGIN);
 
-  app.enableCors((req, callback) => {
+  app.enableCors((req: CorsRequestLike, callback: CorsOptionsCallback) => {
     const method = req.method?.toUpperCase() ?? 'GET';
     const path = req.path ?? req.url ?? '';
     const requestOrigin = req.headers.origin;
@@ -111,4 +123,4 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`Server running on port ${port}`);
 }
-bootstrap();
+void bootstrap();

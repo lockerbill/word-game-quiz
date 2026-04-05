@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Game } from '../entities/game.entity.js';
 import { User } from '../entities/user.entity.js';
 import { RedisService } from '../redis/redis.service.js';
@@ -30,7 +30,9 @@ export class LeaderboardService {
   async getGlobal(limit = 100): Promise<LeaderboardEntry[]> {
     const cacheKey = `leaderboard:global:${limit}`;
     const cached = await this.redis.get(cacheKey);
-    if (cached) return JSON.parse(cached);
+    if (cached) {
+      return this.parseCachedEntries(cached);
+    }
 
     const entries = await this.queryLeaderboard(undefined, limit);
     await this.redis.set(cacheKey, JSON.stringify(entries), 60);
@@ -40,7 +42,9 @@ export class LeaderboardService {
   async getWeekly(limit = 100): Promise<LeaderboardEntry[]> {
     const cacheKey = `leaderboard:weekly:${limit}`;
     const cached = await this.redis.get(cacheKey);
-    if (cached) return JSON.parse(cached);
+    if (cached) {
+      return this.parseCachedEntries(cached);
+    }
 
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -53,7 +57,9 @@ export class LeaderboardService {
   async getDaily(limit = 100): Promise<LeaderboardEntry[]> {
     const cacheKey = `leaderboard:daily:${limit}`;
     const cached = await this.redis.get(cacheKey);
-    if (cached) return JSON.parse(cached);
+    if (cached) {
+      return this.parseCachedEntries(cached);
+    }
 
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -109,5 +115,14 @@ export class LeaderboardService {
       letter: g.letter,
       date: g.createdAt.toISOString(),
     }));
+  }
+
+  private parseCachedEntries(cached: string): LeaderboardEntry[] {
+    const parsed = JSON.parse(cached) as unknown;
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed as LeaderboardEntry[];
   }
 }

@@ -1,13 +1,18 @@
-import { Controller, Get, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
-  ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiQuery,
   ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { UserService } from './user.service.js';
+import type { User } from '../entities/user.entity.js';
+
+interface UserRequest {
+  user: Pick<User, 'id'>;
+}
 
 @ApiTags('user')
 @ApiBearerAuth('JWT')
@@ -22,7 +27,7 @@ export class UserController {
     status: 200,
     description: 'User profile including level, XP, and lifetime stats',
   })
-  profile(@Request() req: any) {
+  profile(@Req() req: UserRequest) {
     return this.userService.getProfile(req.user.id);
   }
 
@@ -32,7 +37,7 @@ export class UserController {
     description: 'Includes XP progress, average score, and per-mode breakdown.',
   })
   @ApiResponse({ status: 200, description: 'Detailed stats object' })
-  stats(@Request() req: any) {
+  stats(@Req() req: UserRequest) {
     return this.userService.getStats(req.user.id);
   }
 
@@ -44,7 +49,7 @@ export class UserController {
   })
   @ApiQuery({ name: 'limit', required: false, example: 20 })
   @ApiResponse({ status: 200, description: 'Array of game records' })
-  history(@Request() req: any, @Query('limit') limit?: number) {
+  history(@Req() req: UserRequest, @Query('limit') limit?: number) {
     return this.userService.getHistory(req.user.id, limit || 20);
   }
 }
