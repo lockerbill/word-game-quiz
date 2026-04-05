@@ -234,6 +234,7 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
   - Moved user role/status mutations to `/api/admin/users/:userId/role` and `/api/admin/users/:userId/status` with reason-required DTO validation.
   - Preserved RBAC constraints and admin audit logging for role/status mutations.
   - Evidence: `server/src/admin-users/admin-users.module.ts`, `server/src/admin-users/admin-users.controller.ts`, `server/src/admin-users/admin-users.service.ts`
+  - Commit: `40c8ab4`
 
 - TODO-P1-ADMIN-005 - Implement `admin-settings` module
   - Runtime settings store with optimistic version checks and rollback.
