@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
+import { AdminSettingsService } from '../admin-settings/admin-settings.service.js';
 import { Game } from '../entities/game.entity.js';
 import { GameAnswer } from '../entities/game-answer.entity.js';
 import { User } from '../entities/user.entity.js';
@@ -60,11 +61,14 @@ export class GameService {
     private categoryRepo: Repository<Category>,
     @InjectRepository(Answer)
     private answerRepo: Repository<Answer>,
+    private adminSettingsService: AdminSettingsService,
     private aiValidationService: AiValidationService,
   ) {}
 
   async startGame(userId: string, dto: StartGameDto) {
     const { mode } = dto;
+    const runtimeSettings =
+      await this.adminSettingsService.getRuntimeSettings();
 
     let letter: string;
     let categories: Pick<Category, 'id' | 'name' | 'difficulty' | 'emoji'>[];
@@ -75,10 +79,15 @@ export class GameService {
       categories = daily.categories;
     } else {
       letter = selectWeightedLetter(mode === 'hardcore');
-      categories = await this.selectCategoriesForGame();
+      categories = await this.selectCategoriesForGame(
+        runtimeSettings.game.categoriesPerGame,
+      );
     }
 
-    const timerDuration = this.getTimerDuration(mode);
+    const timerDuration = this.getTimerDuration(
+      mode,
+      runtimeSettings.game.timerSecondsByMode,
+    );
     const gameId = this.generateId();
 
     // Store pending game
@@ -247,26 +256,35 @@ export class GameService {
 
   // --- Private helpers ---
 
-  private getTimerDuration(mode: string): number {
+  private getTimerDuration(
+    mode: string,
+    timerSecondsByMode: {
+      practice: number;
+      ranked: number;
+      daily: number;
+      relax: number;
+      hardcore: number;
+    },
+  ): number {
     switch (mode) {
       case 'practice':
-        return 30;
+        return timerSecondsByMode.practice;
       case 'ranked':
-        return 30;
+        return timerSecondsByMode.ranked;
       case 'daily':
-        return 30;
+        return timerSecondsByMode.daily;
       case 'relax':
-        return 0;
+        return timerSecondsByMode.relax;
       case 'hardcore':
-        return 20;
+        return timerSecondsByMode.hardcore;
       default:
-        return 30;
+        return timerSecondsByMode.practice;
     }
   }
 
-  private async selectCategoriesForGame(): Promise<
-    Pick<Category, 'id' | 'name' | 'difficulty' | 'emoji'>[]
-  > {
+  private async selectCategoriesForGame(
+    categoriesPerGame: number,
+  ): Promise<Pick<Category, 'id' | 'name' | 'difficulty' | 'emoji'>[]> {
     const categories = await this.categoryRepo
       .createQueryBuilder('category')
       .innerJoin('category.answers', 'answer')
@@ -282,10 +300,10 @@ export class GameService {
       .addGroupBy('category.difficulty')
       .addGroupBy('category.emoji')
       .orderBy('RANDOM()')
-      .limit(10)
+      .limit(categoriesPerGame)
       .getMany();
 
-    if (categories.length < 10) {
+    if (categories.length < categoriesPerGame) {
       throw new NotFoundException(
         'Not enough categories with answers in database',
       );
@@ -298,6 +316,10 @@ export class GameService {
     letter: string;
     categories: Pick<Category, 'id' | 'name' | 'difficulty' | 'emoji'>[];
   }> {
+    const runtimeSettings =
+      await this.adminSettingsService.getRuntimeSettings();
+    const categoriesPerGame = runtimeSettings.game.categoriesPerGame;
+
     const today = new Date();
     const seed =
       today.getUTCFullYear() * 10000 +
@@ -323,9 +345,9 @@ export class GameService {
       .orderBy('category.id', 'ASC')
       .getMany();
     const shuffled = [...eligible].sort(() => rand() - 0.5);
-    const categories = shuffled.slice(0, 10);
+    const categories = shuffled.slice(0, categoriesPerGame);
 
-    if (categories.length < 10) {
+    if (categories.length < categoriesPerGame) {
       throw new NotFoundException(
         'Not enough categories with answers in database',
       );

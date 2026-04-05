@@ -6,3 +6,4 @@ export { Answer } from './answer.entity';
 export { AdminAuditLog } from './admin-audit-log.entity';
 export { ContentImportJob } from './content-import-job.entity';
 export { ContentRevision } from './content-revision.entity';
+export { AdminSettingsRevision } from './admin-settings-revision.entity';

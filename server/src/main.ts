@@ -95,6 +95,10 @@ async function bootstrap() {
       .addTag('admin', 'Admin APIs — RBAC-protected management endpoints')
       .addTag('admin-content', 'Admin content APIs — categories and answers')
       .addTag('admin-users', 'Admin user APIs — search, role and status')
+      .addTag(
+        'admin-settings',
+        'Admin settings APIs — runtime config revisions',
+      )
       .build();
 
     const document = SwaggerModule.createDocument(app, config);

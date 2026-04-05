@@ -7,11 +7,13 @@ import { GameAnswer } from '../entities/game-answer.entity.js';
 import { User } from '../entities/user.entity.js';
 import { Category } from '../entities/category.entity.js';
 import { Answer } from '../entities/answer.entity.js';
+import { AdminSettingsModule } from '../admin-settings/admin-settings.module.js';
 import { AiValidationModule } from '../ai-validation/ai-validation.module.js';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Game, GameAnswer, User, Category, Answer]),
+    AdminSettingsModule,
     AiValidationModule,
   ],
   controllers: [GameController],

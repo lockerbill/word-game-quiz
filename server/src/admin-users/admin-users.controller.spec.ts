@@ -15,8 +15,7 @@ jest.mock('@nestjs/passport', () => ({
         const roleHeader = req.headers['x-role'];
         const statusHeader = req.headers['x-status'];
 
-        const role =
-          typeof roleHeader === 'string' ? roleHeader : 'admin';
+        const role = typeof roleHeader === 'string' ? roleHeader : 'admin';
         const accountStatus =
           typeof statusHeader === 'string' ? statusHeader : 'active';
 

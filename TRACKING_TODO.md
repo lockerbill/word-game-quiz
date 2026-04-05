@@ -236,8 +236,11 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
   - Evidence: `server/src/admin-users/admin-users.module.ts`, `server/src/admin-users/admin-users.controller.ts`, `server/src/admin-users/admin-users.service.ts`
   - Commit: `40c8ab4`
 
-- TODO-P1-ADMIN-005 - Implement `admin-settings` module
-  - Runtime settings store with optimistic version checks and rollback.
+- DONE-P1-ADMIN-005 - Implement `admin-settings` module
+  - Added runtime settings revision store with optimistic version checks (`expectedVersion`) for publish and rollback operations.
+  - Added admin settings endpoints for current settings, revision history, publish update, and rollback.
+  - Wired runtime settings consumption into game mode timer/category selection and AI validation behavior.
+  - Evidence: `server/src/admin-settings/admin-settings.module.ts`, `server/src/admin-settings/admin-settings.controller.ts`, `server/src/admin-settings/admin-settings.service.ts`, `server/src/entities/admin-settings-revision.entity.ts`
 
 ### P2 - Anti-cheat (MVP)
 

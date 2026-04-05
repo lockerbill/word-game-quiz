@@ -13,6 +13,7 @@ import { RedisModule } from './redis/redis.module.js';
 import { AdminModule } from './admin/admin.module.js';
 import { AdminContentModule } from './admin-content/admin-content.module.js';
 import { AdminUsersModule } from './admin-users/admin-users.module.js';
+import { AdminSettingsModule } from './admin-settings/admin-settings.module.js';
 import { User } from './entities/user.entity.js';
 import { Game } from './entities/game.entity.js';
 import { GameAnswer } from './entities/game-answer.entity.js';
@@ -21,6 +22,7 @@ import { Answer } from './entities/answer.entity.js';
 import { AdminAuditLog } from './entities/admin-audit-log.entity.js';
 import { ContentImportJob } from './entities/content-import-job.entity.js';
 import { ContentRevision } from './entities/content-revision.entity.js';
+import { AdminSettingsRevision } from './entities/admin-settings-revision.entity.js';
 
 @Module({
   imports: [
@@ -39,6 +41,7 @@ import { ContentRevision } from './entities/content-revision.entity.js';
         AdminAuditLog,
         ContentImportJob,
         ContentRevision,
+        AdminSettingsRevision,
       ],
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV === 'development',
@@ -65,6 +68,7 @@ import { ContentRevision } from './entities/content-revision.entity.js';
     AdminModule,
     AdminContentModule,
     AdminUsersModule,
+    AdminSettingsModule,
     GameModule,
     LeaderboardModule,
     UserModule,

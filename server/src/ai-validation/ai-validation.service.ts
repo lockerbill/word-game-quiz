@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { AdminSettingsService } from '../admin-settings/admin-settings.service.js';
 import { RedisService } from '../redis/redis.service.js';
 import type {
   AiValidationRequest,
@@ -17,6 +18,7 @@ export class AiValidationService {
   private readonly errorsByProvider = new Map<string, number>();
 
   constructor(
+    private readonly adminSettingsService: AdminSettingsService,
     private readonly redis: RedisService,
     private readonly openAiProvider: OpenAiValidationProvider,
     private readonly ollamaProvider: OllamaValidationProvider,
@@ -26,12 +28,15 @@ export class AiValidationService {
   async validateUnknownAnswer(
     request: AiValidationRequest,
   ): Promise<AiValidationResult> {
-    const enabled = (process.env.AI_VALIDATION_ENABLED || 'true') === 'true';
-    if (!enabled) {
+    const runtimeSettings =
+      await this.adminSettingsService.getRuntimeSettings();
+    if (!runtimeSettings.aiValidation.enabled) {
       return this.strictInvalid('ai_error', null, null);
     }
 
-    const provider = this.getConfiguredProvider();
+    const provider = this.getConfiguredProvider(
+      runtimeSettings.aiValidation.provider,
+    );
     const model = provider.getModel();
     const cacheKey = this.buildCacheKey(provider.name, model, request);
     const cached = await this.redis.get(cacheKey);
@@ -45,18 +50,8 @@ export class AiValidationService {
     }
 
     try {
-      const timeoutMsRaw = Number(process.env.AI_VALIDATION_TIMEOUT_MS || 2500);
-      const timeoutMs =
-        Number.isFinite(timeoutMsRaw) && timeoutMsRaw > 0 ? timeoutMsRaw : 2500;
-      const minConfidenceRaw = Number(
-        process.env.AI_VALIDATION_MIN_CONFIDENCE || 0.7,
-      );
-      const minConfidence =
-        Number.isFinite(minConfidenceRaw) &&
-        minConfidenceRaw >= 0 &&
-        minConfidenceRaw <= 1
-          ? minConfidenceRaw
-          : 0.7;
+      const timeoutMs = runtimeSettings.aiValidation.timeoutMs;
+      const minConfidence = runtimeSettings.aiValidation.minConfidence;
 
       this.trackAttempt(provider.name);
       const modelResult = await this.withTimeout(
@@ -74,10 +69,7 @@ export class AiValidationService {
         model,
       };
 
-      const ttlRaw = Number(
-        process.env.AI_VALIDATION_CACHE_TTL_SECONDS || 604800,
-      );
-      const ttl = Number.isFinite(ttlRaw) && ttlRaw > 0 ? ttlRaw : 604800;
+      const ttl = runtimeSettings.aiValidation.cacheTtlSeconds;
       await this.redis.set(cacheKey, JSON.stringify(result), ttl);
       return result;
     } catch (error) {
@@ -89,10 +81,7 @@ export class AiValidationService {
     }
   }
 
-  private getConfiguredProvider(): AiValidationProvider {
-    const configured = (
-      process.env.AI_VALIDATION_PROVIDER || 'openai'
-    ).toLowerCase();
+  private getConfiguredProvider(configured: string): AiValidationProvider {
     if (configured === 'ollama') {
       return this.ollamaProvider;
     }
