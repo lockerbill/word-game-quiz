@@ -250,14 +250,22 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
 
 ### P2 - Separate admin frontend app (`admin-web`)
 
-- TODO-P2-ADMIN-001 - Bootstrap standalone admin app
-  - New React + TypeScript app in `admin-web/` with independent package and CI job.
+- DONE-P2-ADMIN-001 - Bootstrap standalone admin app
+  - Created standalone React + TypeScript + Vite app in `admin-web/` with independent package, route shell, and admin auth bootstrap.
+  - Added dedicated CI job for `admin-web` (lint + typecheck + build).
+  - Evidence: `admin-web/package.json`, `admin-web/src/App.tsx`, `admin-web/src/auth/AuthContext.tsx`, `.github/workflows/ci.yml`
 
-- TODO-P2-ADMIN-002 - Implement admin auth flow
-  - Login, token/session handling, protected routes, idle timeout.
+- DONE-P2-ADMIN-002 - Implement admin auth flow
+  - Added login/session handling with token persistence, protected route redirects, and logout reason UX.
+  - Added API auth-failure handling (`401/403`) and cross-tab session sync.
+  - Added 15-minute idle timeout auto-logout (configurable via `VITE_ADMIN_IDLE_TIMEOUT_MS`).
+  - Evidence: `admin-web/src/auth/AuthContext.tsx`, `admin-web/src/components/ProtectedRoute.tsx`, `admin-web/src/api/client.ts`, `admin-web/src/pages/LoginPage.tsx`, `admin-web/.env.example`
 
-- TODO-P2-ADMIN-003 - Build content management screens
-  - Categories table/editor, answers table/editor, bulk import UI.
+- DONE-P2-ADMIN-003 - Build content management screens
+  - Implemented categories table/editor with search, status filter, pagination, create/edit, and enable/disable actions.
+  - Implemented answers table/editor with category selector, letter filter, pagination, create/edit, and delete actions.
+  - Implemented bulk import UI for validation job create, job list/detail view, and apply flow.
+  - Evidence: `admin-web/src/pages/ContentPage.tsx`, `admin-web/src/api/adminContentApi.ts`, `admin-web/src/types/adminContent.ts`, `admin-web/src/index.css`
 
 - TODO-P2-ADMIN-004 - Build user management screens
   - User list/detail, role management, account status actions.

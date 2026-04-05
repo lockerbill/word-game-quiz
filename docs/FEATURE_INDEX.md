@@ -60,6 +60,8 @@ Fast file lookup for common tasks.
 - Playwright config: `playwright.config.ts`
 - Web tests: `tests/web/*.spec.ts`
 - Server Jest config/scripts: `server/package.json`
+- Admin web entry/routing: `admin-web/src/main.tsx`, `admin-web/src/App.tsx`
+- Admin web auth/api bootstrap: `admin-web/src/auth/AuthContext.tsx`, `admin-web/src/api/adminAuthApi.ts`
 - Server e2e config: `server/test/jest-e2e.json`
 - ESLint: `server/eslint.config.mjs`
 - Prettier: `server/.prettierrc`

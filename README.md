@@ -6,6 +6,7 @@ This repository contains:
 
 - **Client app**: React Native + Expo (root project)
 - **Server API**: NestJS (`server/`)
+- **Admin web app**: React + Vite (`admin-web/`)
 - **Local infrastructure**: PostgreSQL + Redis via Docker Compose
 
 ## Prerequisites
@@ -109,6 +110,23 @@ npm run android
 npm run ios
 npm run web
 ```
+
+### 4) Run the admin frontend (Vite)
+
+In another terminal:
+
+```bash
+cd admin-web
+npm install
+```
+
+Create `admin-web/.env` from `admin-web/.env.example`, then run:
+
+```bash
+npm run dev
+```
+
+Admin app runs on `http://localhost:5173` by default.
 
 ## Helpful Commands
 
