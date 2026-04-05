@@ -32,6 +32,20 @@ Required variables in `server/.env`:
 - `PORT` (default: `3000`)
 - `NODE_ENV` (default: `development`)
 - `CORS_ORIGIN`
+- `ADMIN_CORS_ORIGIN` (comma-separated admin web origins; required to call `/api/admin/*` from browser)
+
+Optional super admin bootstrap variables:
+
+- `ADMIN_BOOTSTRAP_ENABLED` (`true` to bootstrap a super admin at startup, default: `false`)
+- `ADMIN_BOOTSTRAP_EMAIL` (required when bootstrap is enabled)
+- `ADMIN_BOOTSTRAP_PASSWORD` (required when bootstrap is enabled)
+- `ADMIN_BOOTSTRAP_USERNAME` (default: `superadmin`)
+
+Optional admin throttling variables:
+
+- `ADMIN_THROTTLE_LIMIT` (default: `30`)
+- `ADMIN_THROTTLE_TTL_MS` (default: `60000`)
+- `ADMIN_MUTATION_THROTTLE_LIMIT` (default: `10`)
 
 Optional AI validation variables:
 

@@ -5,17 +5,62 @@ import helmet from 'helmet';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
 
+function parseOriginList(value: string | undefined): string[] {
+  return (value ?? '')
+    .split(',')
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Security headers
   app.use(helmet());
 
-  // CORS - allow mobile app
-  app.enableCors({
-    origin: process.env.CORS_ORIGIN || '*',
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    credentials: true,
+  const publicCorsOrigin = process.env.CORS_ORIGIN || '*';
+  const publicCorsOrigins = parseOriginList(publicCorsOrigin);
+  const adminCorsOrigins = parseOriginList(process.env.ADMIN_CORS_ORIGIN);
+
+  app.enableCors((req, callback) => {
+    const method = req.method?.toUpperCase() ?? 'GET';
+    const path = req.path ?? req.url ?? '';
+    const requestOrigin = req.headers.origin;
+    const isAdminRoute = path.startsWith('/api/admin');
+
+    const baseOptions = {
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      credentials: true,
+    };
+
+    if (isAdminRoute) {
+      const adminOriginAllowed =
+        typeof requestOrigin === 'string' &&
+        adminCorsOrigins.includes(requestOrigin);
+
+      callback(null, {
+        ...baseOptions,
+        origin: adminOriginAllowed ? requestOrigin : false,
+      });
+      return;
+    }
+
+    if (publicCorsOrigin === '*') {
+      callback(null, {
+        ...baseOptions,
+        origin: true,
+      });
+      return;
+    }
+
+    const publicOriginAllowed =
+      typeof requestOrigin === 'string' &&
+      publicCorsOrigins.includes(requestOrigin);
+
+    callback(null, {
+      ...baseOptions,
+      origin: publicOriginAllowed ? requestOrigin : method === 'OPTIONS',
+    });
   });
 
   // Global prefix
@@ -47,6 +92,9 @@ async function bootstrap() {
       .addTag('game', 'Game sessions — start, submit, daily challenge')
       .addTag('leaderboard', 'Leaderboards — global, weekly, daily')
       .addTag('user', 'User profile, stats and game history')
+      .addTag('admin', 'Admin APIs — RBAC-protected management endpoints')
+      .addTag('admin-content', 'Admin content APIs — categories and answers')
+      .addTag('admin-users', 'Admin user APIs — search, role and status')
       .build();
 
     const document = SwaggerModule.createDocument(app, config);

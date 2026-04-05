@@ -23,6 +23,8 @@ export class UserService {
       username: user.username,
       email: user.email,
       isGuest: user.isGuest,
+      role: user.role,
+      accountStatus: user.accountStatus,
       avatar: user.avatar,
       level: user.level,
       xp: user.xp,

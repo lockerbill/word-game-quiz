@@ -3,3 +3,6 @@ export { Game } from './game.entity';
 export { GameAnswer } from './game-answer.entity';
 export { Category } from './category.entity';
 export { Answer } from './answer.entity';
+export { AdminAuditLog } from './admin-audit-log.entity';
+export { ContentImportJob } from './content-import-job.entity';
+export { ContentRevision } from './content-revision.entity';

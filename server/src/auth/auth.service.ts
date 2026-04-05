@@ -26,6 +26,8 @@ export class AuthService {
       sub: user.id,
       username: user.username,
       isGuest: user.isGuest,
+      role: user.role,
+      accountStatus: user.accountStatus,
     };
     return this.jwtService.sign(payload);
   }
@@ -45,6 +47,8 @@ export class AuthService {
       email: dto.email,
       passwordHash,
       isGuest: false,
+      role: 'player',
+      accountStatus: 'active',
     });
     await this.userRepo.save(user);
 
@@ -76,6 +80,8 @@ export class AuthService {
     const user = this.userRepo.create({
       username: `Guest_${guestId}`,
       isGuest: true,
+      role: 'player',
+      accountStatus: 'active',
     });
     await this.userRepo.save(user);
 
@@ -103,6 +109,8 @@ export class AuthService {
     user.email = dto.email;
     user.passwordHash = await bcrypt.hash(dto.password, 10);
     user.isGuest = false;
+    user.role = 'player';
+    user.accountStatus = 'active';
     await this.userRepo.save(user);
 
     return {
@@ -117,6 +125,8 @@ export class AuthService {
       username: user.username,
       email: user.email,
       isGuest: user.isGuest,
+      role: user.role,
+      accountStatus: user.accountStatus,
       avatar: user.avatar,
       level: user.level,
       xp: user.xp,

@@ -132,7 +132,14 @@ REQ-MULTIPLAYER-001 - Multiplayer mode (matchmaking + simultaneous play)
 - Status: TODO
 
 REQ-CONTENT-ADMIN-001 - Content expansion system + admin panel
-- Status: TODO
+- Status: TODO (planned: Option 2 separate admin app)
+- Decision:
+  - Admin panel will be a separate web app (`admin-web/`) with separate deploy/domain.
+  - Backend remains NestJS with dedicated `/api/admin/*` endpoints.
+- Scope:
+  - Content management (categories, answers, bulk import, enable/disable, publish/rollback).
+  - User administration (search, role assignment, suspend/reactivate).
+  - Server settings management (game/validation/feature flags with versioning + rollback).
 
 REQ-MODERATION-001 - Moderation pipeline for new content
 - Status: TODO
@@ -168,6 +175,29 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
   - Tighten rules so unknown answers are not always accepted.
   - If keeping leniency, do it only in Practice/Relax.
 
+### P0 - Admin security foundation (Option 2)
+
+- DONE-P0-ADMIN-001 - Add RBAC model to users
+  - Added `role` (`player|moderator|admin|super_admin`) and account status fields to `users`.
+  - Added DB migration file and startup bootstrap path for first `super_admin`.
+  - Evidence: `server/src/entities/user.entity.ts`, `server/src/database/migrations/1743859200000-add-user-role-status.ts`, `server/src/auth/admin-bootstrap.service.ts`
+
+- DONE-P0-ADMIN-002 - Add admin authz guards + decorators
+  - Implemented `@Roles(...)` and route-level `RolesGuard`.
+  - Added RBAC-protected admin namespace under `/api/admin/*`.
+  - Evidence: `server/src/auth/roles.decorator.ts`, `server/src/auth/roles.guard.ts`, `server/src/admin/admin.controller.ts`, `server/src/admin/admin.module.ts`
+
+- DONE-P0-ADMIN-003 - Add admin audit logging
+  - Created `admin_audit_logs` table model + migration.
+  - Added audit logging service and wired admin mutation endpoints to log actor, action, target, before/after, reason, timestamp.
+  - Evidence: `server/src/entities/admin-audit-log.entity.ts`, `server/src/database/migrations/1743862800000-add-admin-audit-logs.ts`, `server/src/admin/admin-audit-log.service.ts`, `server/src/admin/admin.service.ts`
+
+- DONE-P0-ADMIN-004 - Harden admin API surface
+  - Added separate admin CORS policy via `ADMIN_CORS_ORIGIN` for `/api/admin/*`.
+  - Added stricter admin throttling controls (global admin + mutation-specific limits).
+  - Added denied-access monitoring logs in authz/authn guards.
+  - Evidence: `server/src/main.ts`, `server/src/admin/admin.controller.ts`, `server/src/auth/roles.guard.ts`, `server/src/auth/jwt.strategy.ts`
+
 ### P1 - Data model and correctness
 
 - TODO-P1-001 - Move category/answer selection to DB-first
@@ -178,15 +208,69 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
   - Add endpoints or query params for per-mode leaderboards.
   - Add per-user aggregation (highest score / average) and limit duplicates.
 
+### P1 - Admin backend modules
+
+- DONE-P1-ADMIN-001 - Implement `admin-content` module
+  - Added category CRUD and enable/disable endpoints under `/api/admin/content/categories`.
+  - Added answer CRUD endpoints under `/api/admin/content/categories/:categoryId/answers` and `/api/admin/content/answers/:answerId`.
+  - Implemented validation and dedupe checks (case-insensitive category name uniqueness, category+letter+answer uniqueness, answer starts-with-letter rule).
+  - Wired admin audit logs for all content mutations.
+  - Evidence: `server/src/admin-content/admin-content.module.ts`, `server/src/admin-content/admin-content.controller.ts`, `server/src/admin-content/admin-content.service.ts`
+
+- DONE-P1-ADMIN-002 - Implement bulk content import pipeline
+  - Added import job workflow with CSV/JSON payload validation and dry-run result storage.
+  - Added import job status endpoints and apply step to persist categories/answers.
+  - Included validation errors/warnings summaries and audit logs for validate/apply actions.
+  - Evidence: `server/src/admin-content/admin-content-import.service.ts`, `server/src/admin-content/admin-content.controller.ts`, `server/src/entities/content-import-job.entity.ts`
+
+- DONE-P1-ADMIN-003 - Implement content versioning workflow
+  - Added `content_revisions` persistence model and migration for revision history.
+  - Added draft/review/publish workflow endpoints with snapshot-based publish apply.
+  - Added rollback endpoint that restores a published revision and records a new published rollback revision.
+  - Evidence: `server/src/entities/content-revision.entity.ts`, `server/src/admin-content/admin-content-revision.service.ts`, `server/src/admin-content/admin-content.controller.ts`
+
+- DONE-P1-ADMIN-004 - Implement `admin-users` module
+  - Added dedicated admin users module with `/api/admin/users` search/filter endpoint and pagination.
+  - Moved user role/status mutations to `/api/admin/users/:userId/role` and `/api/admin/users/:userId/status` with reason-required DTO validation.
+  - Preserved RBAC constraints and admin audit logging for role/status mutations.
+  - Evidence: `server/src/admin-users/admin-users.module.ts`, `server/src/admin-users/admin-users.controller.ts`, `server/src/admin-users/admin-users.service.ts`
+
+- TODO-P1-ADMIN-005 - Implement `admin-settings` module
+  - Runtime settings store with optimistic version checks and rollback.
+
 ### P2 - Anti-cheat (MVP)
 
 - TODO-P2-001 - Client paste detection instrumentation
 - TODO-P2-002 - Server suspicious flagging + storage
 
+### P2 - Separate admin frontend app (`admin-web`)
+
+- TODO-P2-ADMIN-001 - Bootstrap standalone admin app
+  - New React + TypeScript app in `admin-web/` with independent package and CI job.
+
+- TODO-P2-ADMIN-002 - Implement admin auth flow
+  - Login, token/session handling, protected routes, idle timeout.
+
+- TODO-P2-ADMIN-003 - Build content management screens
+  - Categories table/editor, answers table/editor, bulk import UI.
+
+- TODO-P2-ADMIN-004 - Build user management screens
+  - User list/detail, role management, account status actions.
+
+- TODO-P2-ADMIN-005 - Build settings + audit screens
+  - Settings editor (publish/rollback) and audit log explorer.
+
 ### P3 - AI validation (incremental)
 
 - DONE-P3-001 - Add a server-side validation interface with pluggable backends
 - DONE-P3-002 - Implement AI validator + cache results
+
+### P3 - Testing and rollout
+
+- TODO-P3-ADMIN-001 - Add backend tests for admin RBAC/services/audit.
+- TODO-P3-ADMIN-002 - Add Playwright admin E2E flows.
+- TODO-P3-ADMIN-003 - Deploy admin app to separate domain and restrict admin API origin.
+- TODO-P3-ADMIN-004 - Internal rollout, monitor logs/alerts, then expand admin access.
 
 ### P4+ - Growth / Multiplayer / Admin / Analytics
 

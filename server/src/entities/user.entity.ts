@@ -8,6 +8,9 @@ import {
 } from 'typeorm';
 import { Game } from './game.entity';
 
+export type UserRole = 'player' | 'moderator' | 'admin' | 'super_admin';
+export type UserAccountStatus = 'active' | 'suspended';
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -27,6 +30,17 @@ export class User {
 
   @Column({ default: 'default' })
   avatar: string;
+
+  @Column({ type: 'varchar', length: 20, default: 'player' })
+  role: UserRole;
+
+  @Column({
+    name: 'account_status',
+    type: 'varchar',
+    length: 20,
+    default: 'active',
+  })
+  accountStatus: UserAccountStatus;
 
   @Column({ default: 1 })
   level: number;

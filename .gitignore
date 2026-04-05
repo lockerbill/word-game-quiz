@@ -44,3 +44,4 @@ yarn-error.*
 # Playwright
 playwright-report/
 test-results/
+opencode.json

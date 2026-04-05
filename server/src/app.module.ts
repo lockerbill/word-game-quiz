@@ -10,11 +10,17 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module.js';
 import { UserModule } from './user/user.module.js';
 import { DatabaseModule } from './database/database.module.js';
 import { RedisModule } from './redis/redis.module.js';
+import { AdminModule } from './admin/admin.module.js';
+import { AdminContentModule } from './admin-content/admin-content.module.js';
+import { AdminUsersModule } from './admin-users/admin-users.module.js';
 import { User } from './entities/user.entity.js';
 import { Game } from './entities/game.entity.js';
 import { GameAnswer } from './entities/game-answer.entity.js';
 import { Category } from './entities/category.entity.js';
 import { Answer } from './entities/answer.entity.js';
+import { AdminAuditLog } from './entities/admin-audit-log.entity.js';
+import { ContentImportJob } from './entities/content-import-job.entity.js';
+import { ContentRevision } from './entities/content-revision.entity.js';
 
 @Module({
   imports: [
@@ -24,7 +30,16 @@ import { Answer } from './entities/answer.entity.js';
       url:
         process.env.DATABASE_URL ||
         'postgresql://postgres:password@localhost:5432/alphabucks',
-      entities: [User, Game, GameAnswer, Category, Answer],
+      entities: [
+        User,
+        Game,
+        GameAnswer,
+        Category,
+        Answer,
+        AdminAuditLog,
+        ContentImportJob,
+        ContentRevision,
+      ],
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV === 'development',
     }),
@@ -47,6 +62,9 @@ import { Answer } from './entities/answer.entity.js';
 
     // Feature modules
     AuthModule,
+    AdminModule,
+    AdminContentModule,
+    AdminUsersModule,
     GameModule,
     LeaderboardModule,
     UserModule,
