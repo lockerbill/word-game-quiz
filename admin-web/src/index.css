@@ -267,6 +267,12 @@ button:disabled {
   gap: 6px;
 }
 
+.settings-grid-2 {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .checkbox-row {
   display: flex;
   align-items: center;
@@ -385,6 +391,24 @@ th {
   gap: 8px;
 }
 
+.json-pre {
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  overflow-x: auto;
+}
+
+.audit-json-stack {
+  margin-top: 8px;
+  display: grid;
+  gap: 8px;
+}
+
 .issue-list {
   margin: 8px 0 0;
   padding-left: 18px;
@@ -432,6 +456,10 @@ th {
   }
 
   .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-grid-2 {
     grid-template-columns: 1fr;
   }
 

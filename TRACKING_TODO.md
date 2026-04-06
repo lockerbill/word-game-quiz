@@ -272,8 +272,10 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
   - Added role and account status mutation actions with reason-required prompts and server error surfacing.
   - Evidence: `admin-web/src/pages/UsersPage.tsx`, `admin-web/src/api/adminUsersApi.ts`, `admin-web/src/types/adminUsers.ts`, `admin-web/src/index.css`
 
-- TODO-P2-ADMIN-005 - Build settings + audit screens
-  - Settings editor (publish/rollback) and audit log explorer.
+- DONE-P2-ADMIN-005 - Build settings + audit screens
+  - Implemented runtime settings editor with current snapshot, publish flow, revision history, revision detail, and rollback action.
+  - Implemented audit log explorer with limit filters and expandable JSON views for before/after/metadata.
+  - Evidence: `admin-web/src/pages/SettingsPage.tsx`, `admin-web/src/pages/AuditPage.tsx`, `admin-web/src/api/adminSettingsApi.ts`, `admin-web/src/api/adminAuditApi.ts`, `admin-web/src/types/adminSettings.ts`, `admin-web/src/types/adminAudit.ts`
 
 ### P3 - AI validation (incremental)
 
