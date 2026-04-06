@@ -2,13 +2,16 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { useUserStore } from '../src/store/userStore';
+import { useVoiceStore } from '../src/store/voiceStore';
 import { Colors } from '../src/theme/theme';
 
 export default function RootLayout() {
   const initAuth = useUserStore(s => s.initAuth);
+  const loadVoiceSettings = useVoiceStore(s => s.loadSettings);
 
   useEffect(() => {
     initAuth();
+    loadVoiceSettings();
   }, []);
 
   return (

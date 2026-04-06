@@ -103,6 +103,18 @@ REQ-OFFLINE-001 - Offline practice
 - TODO:
   - Add SQLite store and preload sets per SRS.
 
+REQ-VOICE-MODE-001 - Voice mode (TTS prompts + microphone answers + typing fallback)
+- Status: PARTIAL
+- Current behavior:
+  - Added pluggable client-side voice provider contracts for text-to-speech and speech-to-text.
+  - Added provider registry/factory with graceful noop fallback and optional web speech providers.
+  - Added persisted voice settings store for mode/provider selection and voice defaults.
+  - Gameplay screen now supports in-round voice toggle, prompt playback, and microphone answer capture while preserving typed input.
+- Added Expo mobile voice providers for local device TTS/STT with speech recognition plugin permissions.
+- Evidence: `src/voice/types.ts`, `src/voice/voiceService.ts`, `src/voice/providers/noopVoiceProvider.ts`, `src/voice/providers/webSpeechVoiceProvider.ts`, `src/voice/providers/expoTtsProvider.ts`, `src/voice/providers/expoSttProvider.ts`, `src/store/voiceStore.ts`, `app/_layout.tsx`, `app/game/[mode].tsx`, `app.json`, `package.json`
+- TODO:
+  - Add cloud AI voice providers.
+
 REQ-DATASET-SCALE-001 - 10,000+ categories and 100k+ answers
 - Status: PARTIAL (small static dataset + DB seeding)
 - Evidence: `server/src/game-data/categories.ts`, `server/src/game-data/answers.ts`, `server/src/database/seed.service.ts`
@@ -248,6 +260,29 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
 - TODO-P2-001 - Client paste detection instrumentation
 - TODO-P2-002 - Server suspicious flagging + storage
 
+### P2 - Voice mode foundation
+
+- DONE-P2-VOICE-001 - Implement pluggable local voice provider architecture
+  - Added typed provider interfaces for TTS/STT plus a voice service registry with runtime provider selection.
+  - Added noop providers for safe fallback and web speech providers for local browser capability.
+  - Evidence: `src/voice/types.ts`, `src/voice/voiceService.ts`, `src/voice/providers/noopVoiceProvider.ts`, `src/voice/providers/webSpeechVoiceProvider.ts`
+
+- DONE-P2-VOICE-002 - Add gameplay voice toggle + TTS prompt playback + STT answer capture
+  - Added voice mode toggle in gameplay and voice status/error UX.
+  - Added prompt auto-play on question change and microphone start/stop controls.
+  - Speech transcript updates the answer input while keeping manual typing available.
+  - Added cleanup to stop TTS/STT during question navigation, finish, and screen unmount.
+  - Evidence: `app/game/[mode].tsx`, `src/store/voiceStore.ts`, `src/voice/voiceService.ts`
+- DONE-P2-VOICE-003 - Persist voice mode settings and selected providers in client store
+  - Added `voiceStore` with AsyncStorage persistence, provider id normalization/fallback, and voice defaults.
+  - Loaded voice settings at app bootstrap to make preferences available before gameplay.
+  - Evidence: `src/store/voiceStore.ts`, `app/_layout.tsx`
+- DONE-P2-VOICE-004 - Add mobile local voice providers (Expo TTS + speech recognition)
+  - Added Expo TTS and Expo speech recognition providers and registered them in the pluggable voice service.
+  - Added speech recognition config plugin and permission strings for native platforms.
+  - Note: Native speech recognition requires an Expo development build (not Expo Go).
+  - Evidence: `src/voice/providers/expoTtsProvider.ts`, `src/voice/providers/expoSttProvider.ts`, `src/voice/voiceService.ts`, `app.json`, `package.json`
+
 ### P2 - Separate admin frontend app (`admin-web`)
 
 - DONE-P2-ADMIN-001 - Bootstrap standalone admin app
@@ -281,6 +316,10 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
 
 - DONE-P3-001 - Add a server-side validation interface with pluggable backends
 - DONE-P3-002 - Implement AI validator + cache results
+
+### P3 - Voice provider expansion
+
+- TODO-P3-VOICE-001 - Add cloud AI voice providers (TTS/STT) via provider plugins
 
 ### P3 - Testing and rollout
 
