@@ -6,6 +6,11 @@ import { Colors, Spacing, BorderRadius } from '../../src/theme/theme';
 import { useUserStore } from '../../src/store/userStore';
 import { getXPProgress } from '../../src/engine/Scoring';
 import { ACHIEVEMENTS } from '../../src/gamification/Achievements';
+import {
+  clearApiBaseUrlOverride,
+  getApiBaseUrlConfig,
+  setApiBaseUrlOverride,
+} from '../../src/api/apiClient';
 
 export default function ProfileScreen() {
   const store = useUserStore();
@@ -13,6 +18,29 @@ export default function ProfileScreen() {
   const xpProgress = getXPProgress(store.xp);
   const [editing, setEditing] = React.useState(false);
   const [name, setName] = React.useState(store.username);
+  const [apiUrlInput, setApiUrlInput] = React.useState('');
+  const [apiCurrentOrigin, setApiCurrentOrigin] = React.useState('');
+  const [apiDefaultOrigin, setApiDefaultOrigin] = React.useState('');
+  const [apiOverrideOrigin, setApiOverrideOrigin] = React.useState<string | null>(null);
+  const [testingApiConnection, setTestingApiConnection] = React.useState(false);
+  const [apiConnectionStatus, setApiConnectionStatus] = React.useState<
+    'idle' | 'success' | 'error'
+  >('idle');
+  const [apiConnectionMessage, setApiConnectionMessage] = React.useState(
+    'Not tested yet',
+  );
+
+  const refreshApiUrlConfig = React.useCallback(async () => {
+    const config = await getApiBaseUrlConfig();
+    setApiCurrentOrigin(config.currentApiOrigin);
+    setApiDefaultOrigin(config.defaultApiOrigin);
+    setApiOverrideOrigin(config.overrideApiOrigin);
+    setApiUrlInput(config.overrideApiOrigin || config.currentApiOrigin);
+  }, []);
+
+  React.useEffect(() => {
+    void refreshApiUrlConfig();
+  }, [refreshApiUrlConfig]);
 
   const saveName = () => {
     if (name.trim()) {
@@ -30,6 +58,59 @@ export default function ProfileScreen() {
         onPress: () => store.logout(),
       },
     ]);
+  };
+
+  const saveApiUrl = async () => {
+    try {
+      await setApiBaseUrlOverride(apiUrlInput);
+      await refreshApiUrlConfig();
+      setApiConnectionStatus('idle');
+      setApiConnectionMessage('Not tested yet');
+      Alert.alert('Server Updated', 'App will use the new API server immediately.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Invalid API URL.';
+      Alert.alert('Invalid API URL', message);
+    }
+  };
+
+  const resetApiUrl = async () => {
+    await clearApiBaseUrlOverride();
+    await refreshApiUrlConfig();
+    setApiConnectionStatus('idle');
+    setApiConnectionMessage('Not tested yet');
+    Alert.alert('Server Reset', 'App is now using the default API URL.');
+  };
+
+  const testApiConnection = async () => {
+    setTestingApiConnection(true);
+    setApiConnectionStatus('idle');
+    setApiConnectionMessage('Testing connection...');
+    try {
+      const { currentApiOrigin } = await getApiBaseUrlConfig();
+      const healthzUrl = `${currentApiOrigin}/api/healthz`;
+      const response = await fetch(healthzUrl);
+
+      if (!response.ok) {
+        setApiConnectionStatus('error');
+        setApiConnectionMessage(`Failed (${response.status})`);
+        return;
+      }
+
+      const payload = (await response.json()) as { status?: string };
+      if (payload.status === 'ok') {
+        setApiConnectionStatus('success');
+        setApiConnectionMessage('Connected');
+        return;
+      }
+
+      setApiConnectionStatus('error');
+      setApiConnectionMessage('Unexpected health response');
+    } catch {
+      setApiConnectionStatus('error');
+      setApiConnectionMessage('Network error');
+    } finally {
+      setTestingApiConnection(false);
+    }
   };
 
   const avgScore = store.gamesPlayed > 0
@@ -112,6 +193,74 @@ export default function ProfileScreen() {
             <Text style={styles.signOutText}>Sign Out</Text>
           </TouchableOpacity>
         )}
+
+        <TouchableOpacity
+          style={styles.versionInfoBtn}
+          onPress={() => router.push('/version' as any)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.versionInfoText}>Version Information</Text>
+        </TouchableOpacity>
+
+        <View style={styles.serverSection}>
+          <Text style={styles.serverTitle}>Server API</Text>
+          <Text style={styles.serverHelp}>Set base URL only (example: https://word-game-quiz.onrender.com)</Text>
+          <TextInput
+            style={styles.serverInput}
+            value={apiUrlInput}
+            onChangeText={(value) => {
+              setApiUrlInput(value);
+              setApiConnectionStatus('idle');
+              setApiConnectionMessage('Not tested yet');
+            }}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="https://your-api-host.com"
+            placeholderTextColor={Colors.textTertiary}
+          />
+          <View style={styles.serverActions}>
+            <TouchableOpacity style={styles.serverSaveBtn} onPress={() => void saveApiUrl()} activeOpacity={0.8}>
+              <Text style={styles.serverSaveText}>Save Server</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.serverResetBtn} onPress={() => void resetApiUrl()} activeOpacity={0.8}>
+              <Text style={styles.serverResetText}>Use Default</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={styles.serverTestBtn}
+            onPress={() => void testApiConnection()}
+            activeOpacity={0.8}
+            disabled={testingApiConnection}
+          >
+            <Text style={styles.serverTestText}>
+              {testingApiConnection ? 'Testing...' : 'Test Connection'}
+            </Text>
+          </TouchableOpacity>
+          <View
+            style={[
+              styles.serverStatusBadge,
+              apiConnectionStatus === 'success' && styles.serverStatusBadgeSuccess,
+              apiConnectionStatus === 'error' && styles.serverStatusBadgeError,
+            ]}
+          >
+            <Text
+              style={[
+                styles.serverStatusText,
+                apiConnectionStatus === 'success' && styles.serverStatusTextSuccess,
+                apiConnectionStatus === 'error' && styles.serverStatusTextError,
+              ]}
+            >
+              {apiConnectionMessage}
+            </Text>
+          </View>
+          <Text style={styles.serverMeta}>Current: {apiCurrentOrigin || '-'}</Text>
+          <Text style={styles.serverMeta}>Default: {apiDefaultOrigin || '-'}</Text>
+          {apiOverrideOrigin ? (
+            <Text style={styles.serverMeta}>Override: {apiOverrideOrigin}</Text>
+          ) : (
+            <Text style={styles.serverMeta}>Override: none</Text>
+          )}
+        </View>
 
         {/* Stats Grid */}
         <Text style={styles.sectionTitle}>Stats</Text>
@@ -244,6 +393,90 @@ const styles = StyleSheet.create({
     paddingVertical: 8, paddingHorizontal: 20,
   },
   signOutText: { fontSize: 14, color: Colors.accentRed, fontWeight: '600' },
+  versionInfoBtn: {
+    alignSelf: 'center',
+    marginBottom: Spacing.lg,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    borderRadius: BorderRadius.round,
+    backgroundColor: Colors.surface,
+  },
+  versionInfoText: { fontSize: 14, color: Colors.textSecondary, fontWeight: '600' },
+  serverSection: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    gap: Spacing.sm,
+  },
+  serverTitle: { fontSize: 16, fontWeight: '700', color: Colors.textPrimary },
+  serverHelp: { fontSize: 12, color: Colors.textTertiary },
+  serverInput: {
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    borderRadius: BorderRadius.md,
+    color: Colors.textPrimary,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 10,
+    fontSize: 14,
+  },
+  serverActions: { flexDirection: 'row', gap: Spacing.sm },
+  serverSaveBtn: {
+    flex: 1,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  serverSaveText: { color: Colors.textDark, fontWeight: '700', fontSize: 13 },
+  serverResetBtn: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    borderRadius: BorderRadius.md,
+    paddingVertical: 10,
+    alignItems: 'center',
+    backgroundColor: Colors.surfaceLight,
+  },
+  serverResetText: { color: Colors.textPrimary, fontWeight: '700', fontSize: 13 },
+  serverTestBtn: {
+    backgroundColor: Colors.accent + '30',
+    borderRadius: BorderRadius.md,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.accent + '60',
+  },
+  serverTestText: { color: Colors.accent, fontWeight: '700', fontSize: 13 },
+  serverStatusBadge: {
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    backgroundColor: Colors.surfaceLight,
+    paddingVertical: 8,
+    paddingHorizontal: Spacing.md,
+  },
+  serverStatusBadgeSuccess: {
+    borderColor: Colors.accent + '60',
+    backgroundColor: Colors.accent + '20',
+  },
+  serverStatusBadgeError: {
+    borderColor: Colors.accentRed + '60',
+    backgroundColor: Colors.accentRed + '20',
+  },
+  serverStatusText: {
+    fontSize: 12,
+    color: Colors.textTertiary,
+    fontWeight: '600',
+  },
+  serverStatusTextSuccess: { color: Colors.accent },
+  serverStatusTextError: { color: Colors.accentRed },
+  serverMeta: { fontSize: 12, color: Colors.textTertiary },
 
   sectionTitle: {
     fontSize: 18, fontWeight: '700', color: Colors.textPrimary, marginBottom: Spacing.md,

@@ -132,3 +132,15 @@ Admin app runs on `http://localhost:5173` by default.
 
 - Stop local services: `docker compose down`
 - View service logs: `docker compose logs -f postgres redis`
+
+## App versioning with EAS
+
+- This project includes `eas.json` with `autoIncrement: true` for `development`, `preview`, and `production` build profiles.
+- Every EAS build automatically increments native build numbers (Android `versionCode`, iOS `buildNumber`).
+- `expo.version` in `app.json` is the marketing app version and should be bumped manually for release milestones.
+
+Example Android build command:
+
+```bash
+eas build --platform android --profile preview
+```

@@ -41,6 +41,16 @@ export default function RootLayout() {
           name="auth/register"
           options={{ animation: 'slide_from_bottom' }}
         />
+        <Stack.Screen
+          name="version"
+          options={{
+            headerShown: true,
+            title: 'Version Info',
+            headerStyle: { backgroundColor: Colors.backgroundSecondary },
+            headerTintColor: Colors.textPrimary,
+            headerTitleStyle: { fontWeight: '700' },
+          }}
+        />
       </Stack>
     </>
   );
