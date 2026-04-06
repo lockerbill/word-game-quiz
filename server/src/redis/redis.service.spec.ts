@@ -5,6 +5,39 @@ jest.mock('ioredis', () => {
   return jest.fn();
 });
 
+interface RedisCtorOptions {
+  password?: string;
+}
+
+function getRedisCtorOptions(): RedisCtorOptions | undefined {
+  const callsUnknown = (Redis as unknown as jest.Mock).mock.calls as unknown;
+  if (!Array.isArray(callsUnknown)) {
+    return undefined;
+  }
+
+  const calls = callsUnknown as readonly unknown[];
+  if (calls.length === 0) {
+    return undefined;
+  }
+
+  const firstCallUnknown = calls[0];
+  if (!Array.isArray(firstCallUnknown)) {
+    return undefined;
+  }
+
+  const firstCall = firstCallUnknown as readonly unknown[];
+  if (firstCall.length < 2) {
+    return undefined;
+  }
+
+  const options = firstCall[1];
+  if (typeof options !== 'object' || options === null) {
+    return undefined;
+  }
+
+  return options as RedisCtorOptions;
+}
+
 describe('RedisService', () => {
   const originalEnv = process.env;
   const connectMock = jest.fn();
@@ -44,8 +77,8 @@ describe('RedisService', () => {
     await service.get('leaderboard:daily');
 
     expect(Redis).toHaveBeenCalledTimes(1);
-    const [, options] = (Redis as unknown as jest.Mock).mock.calls[0];
-    expect(options.password).toBeUndefined();
+    const options = getRedisCtorOptions();
+    expect(options?.password).toBeUndefined();
   });
 
   it('passes password when REDIS_REST_TOKEN has a value', async () => {
@@ -55,7 +88,7 @@ describe('RedisService', () => {
     await service.get('leaderboard:weekly');
 
     expect(Redis).toHaveBeenCalledTimes(1);
-    const [, options] = (Redis as unknown as jest.Mock).mock.calls[0];
-    expect(options.password).toBe('upstash-token');
+    const options = getRedisCtorOptions();
+    expect(options?.password).toBe('upstash-token');
   });
 });
