@@ -88,6 +88,17 @@ describe('AdminUsersController', () => {
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     updatedAt: new Date('2026-01-02T00:00:00.000Z'),
   }));
+  const resetUserPassword = jest.fn(() => ({
+    id: 'u-1',
+    username: 'alice',
+    email: 'alice@example.com',
+    isGuest: false,
+    avatar: 'default',
+    role: 'player',
+    accountStatus: 'active',
+    createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+  }));
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -99,6 +110,7 @@ describe('AdminUsersController', () => {
             listUsers,
             updateUserRole,
             updateUserStatus,
+            resetUserPassword,
           },
         },
         RolesGuard,
@@ -217,6 +229,37 @@ describe('AdminUsersController', () => {
       {
         accountStatus: 'suspended',
         reason: 'Suspended due to repeated policy violations',
+      },
+    );
+  });
+
+  it('validates password reset payload and rejects short password', async () => {
+    await request(httpServer())
+      .patch('/admin/users/u-1/password')
+      .set('x-role', 'admin')
+      .send({ password: '12345', reason: 'Reset for account recovery' })
+      .expect(400);
+
+    expect(resetUserPassword).not.toHaveBeenCalled();
+  });
+
+  it('accepts valid password reset and forwards actor + payload', async () => {
+    await request(httpServer())
+      .patch('/admin/users/u-1/password')
+      .set('x-role', 'admin')
+      .send({ password: 'qaz123', reason: 'Reset for account recovery' })
+      .expect(200);
+
+    expect(resetUserPassword).toHaveBeenCalledWith(
+      {
+        id: 'admin-1',
+        role: 'admin',
+        accountStatus: 'active',
+      },
+      'u-1',
+      {
+        password: 'qaz123',
+        reason: 'Reset for account recovery',
       },
     );
   });

@@ -288,6 +288,10 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
 - TODO-P3-ADMIN-002 - Add Playwright admin E2E flows.
 - TODO-P3-ADMIN-003 - Deploy admin app to separate domain and restrict admin API origin.
 - TODO-P3-ADMIN-004 - Internal rollout, monitor logs/alerts, then expand admin access.
+- TODO-P3-ADMIN-005 - Add temporary password reset + must-change-on-next-login flow
+  - Admin can set a temporary password from user management.
+  - User must change password on first login after temporary reset.
+  - Add backend enforcement and admin/web UX + tests.
 
 ### P4+ - Growth / Multiplayer / Admin / Analytics
 

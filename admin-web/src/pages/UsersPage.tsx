@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   listAdminUsersApi,
+  updateUserPasswordApi,
   updateUserRoleApi,
   updateUserStatusApi,
 } from '../api/adminUsersApi';
@@ -191,6 +192,39 @@ export function UsersPage() {
     }
   }
 
+  async function handleResetPassword(user: AdminUser) {
+    const password = window.prompt(`Enter a new password for ${user.username}:`);
+    if (!password) {
+      return;
+    }
+
+    if (password.length < 6) {
+      setMutationError('Password must be at least 6 characters long.');
+      return;
+    }
+
+    const reason = window.prompt(`Reason for resetting ${user.username}'s password?`);
+    if (!reason) {
+      return;
+    }
+
+    setMutationError(null);
+    setMutationBusyUserId(user.id);
+
+    try {
+      await updateUserPasswordApi(user.id, {
+        password,
+        reason,
+      });
+
+      await loadUsers();
+    } catch (error) {
+      setMutationError(extractApiError(error, 'Unable to reset user password.'));
+    } finally {
+      setMutationBusyUserId(null);
+    }
+  }
+
   function handleFilterSubmit(event: FormEvent) {
     event.preventDefault();
     setPage(1);
@@ -360,6 +394,14 @@ export function UsersPage() {
                             disabled={isBusy || selectedStatus === user.accountStatus}
                           >
                             {isBusy ? 'Saving...' : 'Save status'}
+                          </button>
+                          <button
+                            type="button"
+                            className="ghost-button"
+                            onClick={() => void handleResetPassword(user)}
+                            disabled={isBusy}
+                          >
+                            {isBusy ? 'Saving...' : 'Reset password'}
                           </button>
                         </div>
                         {isSelf ? (

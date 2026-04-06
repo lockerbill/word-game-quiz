@@ -2,6 +2,7 @@ import { apiClient } from './client';
 import type {
   ListAdminUsersQuery,
   PaginatedAdminUsers,
+  UpdateUserPasswordPayload,
   UpdateUserRolePayload,
   UpdateUserStatusPayload,
 } from '../types/adminUsers';
@@ -29,5 +30,16 @@ export async function updateUserStatusApi(
   payload: UpdateUserStatusPayload,
 ) {
   const { data } = await apiClient.patch(`/admin/users/${userId}/status`, payload);
+  return data;
+}
+
+export async function updateUserPasswordApi(
+  userId: string,
+  payload: UpdateUserPasswordPayload,
+) {
+  const { data } = await apiClient.patch(
+    `/admin/users/${userId}/password`,
+    payload,
+  );
   return data;
 }

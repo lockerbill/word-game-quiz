@@ -38,3 +38,8 @@ export interface UpdateUserStatusPayload {
   accountStatus: UserAccountStatus;
   reason: string;
 }
+
+export interface UpdateUserPasswordPayload {
+  password: string;
+  reason: string;
+}

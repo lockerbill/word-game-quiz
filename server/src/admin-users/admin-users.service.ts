@@ -4,10 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { AdminAuditLogService } from '../admin/admin-audit-log.service.js';
 import { User } from '../entities/user.entity.js';
 import { ListAdminUsersQueryDto } from './dto/list-admin-users-query.dto.js';
+import { UpdateUserPasswordDto } from './dto/update-user-password.dto.js';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto.js';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto.js';
 
@@ -143,6 +145,45 @@ export class AdminUsersService {
     await this.adminAuditLogService.logMutation({
       actorUserId: actor.id,
       action: 'user.status.update',
+      targetType: 'user',
+      targetId: user.id,
+      reason: dto.reason,
+      beforeState,
+      afterState,
+    });
+
+    return this.toAdminUserResponse(user);
+  }
+
+  async resetUserPassword(
+    actor: AdminActor,
+    targetUserId: string,
+    dto: UpdateUserPasswordDto,
+  ) {
+    const user = await this.getUserOrThrow(targetUserId);
+
+    if (actor.role !== 'super_admin' && user.role === 'super_admin') {
+      throw new ForbiddenException(
+        'Only super admins can modify super admin users',
+      );
+    }
+
+    const beforeState = {
+      hasPassword: Boolean(user.passwordHash),
+      accountStatus: user.accountStatus,
+    };
+
+    user.passwordHash = await bcrypt.hash(dto.password, 10);
+    await this.userRepo.save(user);
+
+    const afterState = {
+      hasPassword: Boolean(user.passwordHash),
+      accountStatus: user.accountStatus,
+    };
+
+    await this.adminAuditLogService.logMutation({
+      actorUserId: actor.id,
+      action: 'user.password.reset',
       targetType: 'user',
       targetId: user.id,
       reason: dto.reason,

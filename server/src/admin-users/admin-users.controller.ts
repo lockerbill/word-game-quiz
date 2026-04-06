@@ -20,6 +20,7 @@ import { Roles } from '../auth/roles.decorator.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import type { User } from '../entities/user.entity.js';
 import { ListAdminUsersQueryDto } from './dto/list-admin-users-query.dto.js';
+import { UpdateUserPasswordDto } from './dto/update-user-password.dto.js';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto.js';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto.js';
 import { AdminUsersService } from './admin-users.service.js';
@@ -105,5 +106,23 @@ export class AdminUsersController {
     @Body() dto: UpdateUserStatusDto,
   ) {
     return this.adminUsersService.updateUserStatus(req.user, userId, dto);
+  }
+
+  @Patch(':userId/password')
+  @Throttle({
+    default: {
+      limit: adminMutationThrottleLimit,
+      ttl: adminThrottleTtlMs,
+    },
+  })
+  @ApiOperation({ summary: 'Reset a user password (admin operation)' })
+  @ApiResponse({ status: 200, description: 'User password reset' })
+  @ApiResponse({ status: 403, description: 'Insufficient role permissions' })
+  resetUserPassword(
+    @Req() req: AdminUsersRequest,
+    @Param('userId') userId: string,
+    @Body() dto: UpdateUserPasswordDto,
+  ) {
+    return this.adminUsersService.resetUserPassword(req.user, userId, dto);
   }
 }

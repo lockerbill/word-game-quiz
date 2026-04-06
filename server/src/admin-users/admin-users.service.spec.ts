@@ -1,4 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import type { Repository } from 'typeorm';
 import type { AdminAuditLogService } from '../admin/admin-audit-log.service';
 import { User } from '../entities/user.entity';
@@ -146,5 +147,41 @@ describe('AdminUsersService', () => {
         reason: 'Self suspend test',
       }),
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('resets user password and logs audit entry', async () => {
+    const { repo, store } = buildUserRepo();
+    store.set('u-1', buildUser({ id: 'u-1', passwordHash: 'old-hash' }));
+
+    const logMutation = jest.fn();
+    const auditService = { logMutation } as unknown as AdminAuditLogService;
+    const service = new AdminUsersService(repo, auditService);
+
+    const result = await service.resetUserPassword(
+      { id: 'admin-1', role: 'admin' },
+      'u-1',
+      {
+        password: 'qaz123',
+        reason: 'Reset requested by account owner',
+      },
+    );
+
+    const updatedUser = store.get('u-1');
+    expect(updatedUser).toBeDefined();
+    expect(updatedUser?.passwordHash).not.toBe('old-hash');
+    await expect(
+      bcrypt.compare('qaz123', updatedUser?.passwordHash ?? ''),
+    ).resolves.toBe(true);
+
+    expect(result.id).toBe('u-1');
+    expect(logMutation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorUserId: 'admin-1',
+        action: 'user.password.reset',
+        targetType: 'user',
+        targetId: 'u-1',
+        reason: 'Reset requested by account owner',
+      }),
+    );
   });
 });
