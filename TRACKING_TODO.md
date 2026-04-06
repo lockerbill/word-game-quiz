@@ -267,8 +267,10 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
   - Implemented bulk import UI for validation job create, job list/detail view, and apply flow.
   - Evidence: `admin-web/src/pages/ContentPage.tsx`, `admin-web/src/api/adminContentApi.ts`, `admin-web/src/types/adminContent.ts`, `admin-web/src/index.css`
 
-- TODO-P2-ADMIN-004 - Build user management screens
-  - User list/detail, role management, account status actions.
+- DONE-P2-ADMIN-004 - Build user management screens
+  - Implemented admin users list with search, role/status filters, and pagination.
+  - Added role and account status mutation actions with reason-required prompts and server error surfacing.
+  - Evidence: `admin-web/src/pages/UsersPage.tsx`, `admin-web/src/api/adminUsersApi.ts`, `admin-web/src/types/adminUsers.ts`, `admin-web/src/index.css`
 
 - TODO-P2-ADMIN-005 - Build settings + audit screens
   - Settings editor (publish/rollback) and audit log explorer.
