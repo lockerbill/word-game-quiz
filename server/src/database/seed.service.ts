@@ -37,10 +37,7 @@ export class SeedService implements OnApplicationBootstrap {
     }
 
     const existing = await this.userRepo.findOne({
-      where: [
-        { username: defaultAdminUsername },
-        { email: defaultAdminEmail },
-      ],
+      where: [{ username: defaultAdminUsername }, { email: defaultAdminEmail }],
     });
     const passwordHash = await bcrypt.hash(defaultAdminPassword, 10);
 
