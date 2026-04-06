@@ -133,6 +133,9 @@ REQ-AI-VALIDATION-001 - AI answer validation service
 - Evidence: `server/src/ai-validation/ai-validation.service.ts`, `server/src/ai-validation/providers/openai.provider.ts`, `server/src/ai-validation/providers/ollama.provider.ts`, `server/src/ai-validation/providers/gemini.provider.ts`
 - Commit: `1a1c687`
 
+REQ-MISC-001 - Show answers at game result page for learning purpose
+- Status: TODO
+
 REQ-GROWTH-001 - Invite friends + referral rewards
 - Status: TODO
 
