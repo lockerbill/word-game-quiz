@@ -8,14 +8,18 @@ export class RedisService implements OnModuleDestroy {
   private getClient(): Redis {
     if (!this.client) {
       const url = process.env.REDIS_URL || 'redis://localhost:6379';
-      this.client = new Redis(url, {
+      const redisRestToken = process.env.REDIS_REST_TOKEN?.trim();
+      const options = {
         maxRetriesPerRequest: 3,
         retryStrategy(times: number) {
           if (times > 3) return null;
           return Math.min(times * 200, 2000);
         },
         lazyConnect: true,
-      });
+        ...(redisRestToken ? { password: redisRestToken } : {}),
+      };
+
+      this.client = new Redis(url, options);
       this.client.connect().catch(() => {
         // Redis is optional - leaderboard falls back to DB queries
         console.warn('Redis connection failed - caching disabled');
