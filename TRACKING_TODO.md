@@ -135,7 +135,8 @@ REQ-AI-VALIDATION-001 - AI answer validation service
 - Commit: `1a1c687`
 
 REQ-MISC-001 - Show answers at game result page for learning purpose
-- Status: TODO
+- Status: DONE
+- Evidence: `app/game/results.tsx`, `src/store/gameStore.ts`, `src/api/gameApi.ts`, `server/src/game/game.service.ts`
 
 REQ-GROWTH-001 - Invite friends + referral rewards
 - Status: TODO
