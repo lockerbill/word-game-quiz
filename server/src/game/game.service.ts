@@ -134,6 +134,8 @@ export class GameService {
       confidence: number;
       reason: ValidationReason;
       provider: string | null;
+      matchedAnswer: string | null;
+      correctAnswers: string[];
     }[] = [];
 
     const categoryIds = pending.categories.map((c) => c.id);
@@ -156,11 +158,17 @@ export class GameService {
       const userAnswer = submitted?.answer ?? '';
 
       const knownAnswers = answerMap.get(cat.id) || [];
+      const correctAnswers = Array.from(
+        new Map(
+          knownAnswers.map((answer) => [answer.toLowerCase(), answer]),
+        ).values(),
+      ).sort((a, b) => a.localeCompare(b));
       const result = validateAnswer(pending.letter, userAnswer, knownAnswers);
       let finalValid = result.valid;
       let finalConfidence = result.confidence;
       let finalReason: ValidationReason = result.reason;
       let finalProvider: string | null = null;
+      const finalMatchedAnswer: string | null = result.matchedAnswer;
 
       if (result.reason === 'no_match' && userAnswer.trim()) {
         const aiResult = await this.aiValidationService.validateUnknownAnswer({
@@ -183,6 +191,8 @@ export class GameService {
         confidence: finalConfidence,
         reason: finalReason,
         provider: finalProvider,
+        matchedAnswer: finalMatchedAnswer,
+        correctAnswers,
       });
     }
 
@@ -236,6 +246,8 @@ export class GameService {
         confidence: v.confidence,
         reason: v.reason,
         provider: v.provider,
+        matchedAnswer: v.matchedAnswer,
+        correctAnswers: v.correctAnswers,
       })),
     };
   }

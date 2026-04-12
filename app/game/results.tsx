@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Share, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -43,6 +43,7 @@ export default function ResultsScreen() {
   const scoreAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const recorded = useRef(false);
+  const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
 
   useEffect(() => {
     if (!session?.score || recorded.current) return;
@@ -200,6 +201,45 @@ export default function ResultsScreen() {
             </View>
           </View>
         </View>
+
+        <TouchableOpacity
+          style={styles.correctAnswersToggleBtn}
+          onPress={() => setShowCorrectAnswers((prev) => !prev)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.correctAnswersToggleText}>
+            {showCorrectAnswers ? '🙈 Hide Correct Answers' : '📚 View All Correct Answers'}
+          </Text>
+        </TouchableOpacity>
+
+        {showCorrectAnswers && (
+          <View style={styles.correctAnswersCard}>
+            <Text style={styles.correctAnswersTitle}>All Correct Answers</Text>
+            {session.categories.map((cat) => {
+              const validation = session.validations[cat.id];
+              const correctAnswers =
+                validation?.correctAnswers?.length
+                  ? validation.correctAnswers
+                  : validation?.matchedAnswer
+                    ? [validation.matchedAnswer]
+                    : [];
+
+              return (
+                <View key={`correct-${cat.id}`} style={styles.correctAnswersRow}>
+                  <Text style={styles.correctAnswersCategory}>{cat.emoji} {cat.name}</Text>
+                  {correctAnswers.length > 0 ? (
+                    <Text style={styles.correctAnswersValue}>{correctAnswers.join(', ')}</Text>
+                  ) : (
+                    <Text style={styles.correctAnswersEmpty}>
+                      No curated answer list available for this category yet.
+                    </Text>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        )}
+
         <View style={styles.breakdownCard}>
           <View style={styles.letterBanner}>
             <Text style={styles.letterBannerText}>Letter: {session.letter}</Text>
@@ -328,6 +368,54 @@ const styles = StyleSheet.create({
   insightValue: { fontSize: 22, fontWeight: '800', color: Colors.textPrimary },
   insightLabel: { fontSize: 11, color: Colors.textTertiary, marginTop: 2 },
   insightDivider: { width: 1, height: 28, backgroundColor: Colors.glassBorder },
+  correctAnswersToggleBtn: {
+    backgroundColor: Colors.primary + '15',
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.primary + '55',
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  correctAnswersToggleText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.primary,
+  },
+  correctAnswersCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  correctAnswersTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.sm,
+  },
+  correctAnswersRow: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.glassBorder,
+  },
+  correctAnswersCategory: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+    marginBottom: 4,
+  },
+  correctAnswersValue: {
+    fontSize: 14,
+    color: Colors.textPrimary,
+    lineHeight: 20,
+  },
+  correctAnswersEmpty: {
+    fontSize: 13,
+    color: Colors.textTertiary,
+  },
   breakdownCard: {
     backgroundColor: Colors.surface, borderRadius: BorderRadius.lg,
     overflow: 'hidden', marginBottom: Spacing.lg,

@@ -4,6 +4,7 @@ export interface ValidationResult {
   valid: boolean;
   confidence: number;
   matchedAnswer: string | null;
+  correctAnswers: string[];
   provider?: string | null;
   reason:
     | 'exact_match'

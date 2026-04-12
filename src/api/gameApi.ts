@@ -41,6 +41,8 @@ export interface GameSubmitResponse {
       | 'ai_rejected'
       | 'ai_error';
     provider?: string | null;
+    matchedAnswer: string | null;
+    correctAnswers: string[];
   }[];
 }
 

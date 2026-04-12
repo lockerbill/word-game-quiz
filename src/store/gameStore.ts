@@ -146,7 +146,8 @@ export const useGameStore = create<GameState>((set, get) => ({
           acc[item.categoryId] = {
             valid: item.valid,
             confidence: item.confidence,
-            matchedAnswer: null,
+            matchedAnswer: item.matchedAnswer ?? null,
+            correctAnswers: item.correctAnswers ?? [],
             provider: item.provider ?? null,
             reason: item.reason || (item.valid ? 'fuzzy_match' : 'no_match'),
           };
