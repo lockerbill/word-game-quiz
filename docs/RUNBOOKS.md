@@ -187,3 +187,10 @@ Confirm:
 - Server startup issues:
   - Check `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`
   - Ensure `docker compose up -d postgres redis` is healthy
+
+---
+
+## 9) Dataset scale import (REQ-DATASET-SCALE-001)
+
+- Detailed runbook: `docs/CONTENT_IMPORT_RUNBOOK.md`
+- Dataset files: `server/data/req-dataset-scale-001`

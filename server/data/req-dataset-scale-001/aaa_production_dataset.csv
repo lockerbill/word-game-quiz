@@ -1,0 +1,691 @@
+categoryName,difficulty,emoji,enabled,letter,answer
+5-letter Nouns,3,📖,true,A,Apple
+5-letter Nouns,3,📖,true,B,Bread
+5-letter Nouns,3,📖,true,C,Chair
+5-letter Nouns,3,📖,true,D,Dance
+5-letter Nouns,3,📖,true,E,Eagle
+5-letter Nouns,3,📖,true,F,Field
+5-letter Nouns,3,📖,true,G,Grape
+5-letter Nouns,3,📖,true,H,Heart
+5-letter Nouns,3,📖,true,I,Igloo
+5-letter Nouns,3,📖,true,J,Jelly
+5-letter Nouns,3,📖,true,K,Knife
+5-letter Nouns,3,📖,true,L,Lemon
+5-letter Nouns,3,📖,true,M,Money
+5-letter Nouns,3,📖,true,N,Night
+5-letter Nouns,3,📖,true,O,Ocean
+5-letter Nouns,3,📖,true,P,Party
+5-letter Nouns,3,📖,true,Q,Queen
+5-letter Nouns,3,📖,true,R,River
+5-letter Nouns,3,📖,true,S,Stone
+5-letter Nouns,3,📖,true,T,Table
+5-letter Nouns,3,📖,true,U,Union
+5-letter Nouns,3,📖,true,V,Value
+5-letter Nouns,3,📖,true,W,World
+5-letter Nouns,3,📖,true,X,Xenon
+5-letter Nouns,3,📖,true,Y,Youth
+5-letter Nouns,3,📖,true,Z,Zebra
+6-letter Adverbs,3,🔤,true,A,Always
+6-letter Adverbs,3,🔤,true,B,Boldly
+6-letter Adverbs,3,🔤,true,C,Calmly
+6-letter Adverbs,3,🔤,true,E,Easily
+6-letter Adverbs,3,🔤,true,F,Freely
+6-letter Adverbs,3,🔤,true,G,Gently
+6-letter Adverbs,3,🔤,true,H,Highly
+6-letter Adverbs,3,🔤,true,I,Indeed
+6-letter Adverbs,3,🔤,true,J,Justly
+6-letter Adverbs,3,🔤,true,K,Kindly
+6-letter Adverbs,3,🔤,true,L,Loudly
+6-letter Adverbs,3,🔤,true,M,Mostly
+6-letter Adverbs,3,🔤,true,N,Neatly
+6-letter Adverbs,3,🔤,true,O,Openly
+6-letter Adverbs,3,🔤,true,P,Purely
+6-letter Adverbs,3,🔤,true,R,Rarely
+6-letter Adverbs,3,🔤,true,S,Safely
+6-letter Adverbs,3,🔤,true,U,Upward
+6-letter Adverbs,3,🔤,true,V,Vastly
+6-letter Adverbs,3,🔤,true,W,Widely
+6-letter Adverbs,3,🔤,true,Y,Yearly
+6-letter Nouns,3,📚,true,A,Artist
+6-letter Nouns,3,📚,true,B,Bottle
+6-letter Nouns,3,📚,true,C,Camera
+6-letter Nouns,3,📚,true,D,Doctor
+6-letter Nouns,3,📚,true,E,Engine
+6-letter Nouns,3,📚,true,F,Forest
+6-letter Nouns,3,📚,true,G,Garden
+6-letter Nouns,3,📚,true,H,Hotel
+6-letter Nouns,3,📚,true,I,Island
+6-letter Nouns,3,📚,true,J,Jacket
+6-letter Nouns,3,📚,true,K,Kettle
+6-letter Nouns,3,📚,true,L,Laptop
+6-letter Nouns,3,📚,true,M,Market
+6-letter Nouns,3,📚,true,N,Noodle
+6-letter Nouns,3,📚,true,O,Office
+6-letter Nouns,3,📚,true,P,Planet
+6-letter Nouns,3,📚,true,Q,Quarry
+6-letter Nouns,3,📚,true,R,Rocket
+6-letter Nouns,3,📚,true,S,School
+6-letter Nouns,3,📚,true,T,Ticket
+6-letter Nouns,3,📚,true,U,Update
+6-letter Nouns,3,📚,true,V,Valley
+6-letter Nouns,3,📚,true,W,Window
+6-letter Nouns,3,📚,true,X,Xylitol
+6-letter Nouns,3,📚,true,Y,Yogurt
+6-letter Nouns,3,📚,true,Z,Zipper
+7-letter Nouns,3,📝,true,A,Airport
+7-letter Nouns,3,📝,true,B,Bedroom
+7-letter Nouns,3,📝,true,C,Cabinet
+7-letter Nouns,3,📝,true,D,Diamond
+7-letter Nouns,3,📝,true,E,Episode
+7-letter Nouns,3,📝,true,F,Factory
+7-letter Nouns,3,📝,true,G,Gallery
+7-letter Nouns,3,📝,true,H,Hallway
+7-letter Nouns,3,📝,true,I,Invoice
+7-letter Nouns,3,📝,true,J,Journey
+7-letter Nouns,3,📝,true,K,Kitchen
+7-letter Nouns,3,📝,true,L,Lantern
+7-letter Nouns,3,📝,true,M,Machine
+7-letter Nouns,3,📝,true,N,Network
+7-letter Nouns,3,📝,true,O,Orchard
+7-letter Nouns,3,📝,true,P,Picture
+7-letter Nouns,3,📝,true,Q,Quality
+7-letter Nouns,3,📝,true,R,Railway
+7-letter Nouns,3,📝,true,S,Stadium
+7-letter Nouns,3,📝,true,T,Teacher
+7-letter Nouns,3,📝,true,U,Upgrade
+7-letter Nouns,3,📝,true,V,Village
+7-letter Nouns,3,📝,true,W,Weather
+7-letter Nouns,3,📝,true,X,Xylitol
+7-letter Nouns,3,📝,true,Y,Yearbook
+7-letter Nouns,3,📝,true,Z,Zipline
+Animals,1,🐾,true,A,Ant
+Animals,1,🐾,true,B,Bear
+Animals,1,🐾,true,C,Cat
+Animals,1,🐾,true,D,Dog
+Animals,1,🐾,true,E,Elephant
+Animals,1,🐾,true,F,Fox
+Animals,1,🐾,true,G,Giraffe
+Animals,1,🐾,true,H,Horse
+Animals,1,🐾,true,I,Iguana
+Animals,1,🐾,true,J,Jaguar
+Animals,1,🐾,true,K,Kangaroo
+Animals,1,🐾,true,L,Lion
+Animals,1,🐾,true,M,Monkey
+Animals,1,🐾,true,N,Newt
+Animals,1,🐾,true,O,Owl
+Animals,1,🐾,true,P,Panda
+Animals,1,🐾,true,Q,Quail
+Animals,1,🐾,true,R,Rabbit
+Animals,1,🐾,true,S,Snake
+Animals,1,🐾,true,T,Tiger
+Animals,1,🐾,true,U,Urial
+Animals,1,🐾,true,V,Vulture
+Animals,1,🐾,true,W,Wolf
+Animals,1,🐾,true,X,Xerus
+Animals,1,🐾,true,Y,Yak
+Animals,1,🐾,true,Z,Zebra
+Birds,2,🐦,true,A,Albatross
+Birds,2,🐦,true,B,Bluebird
+Birds,2,🐦,true,C,Crow
+Birds,2,🐦,true,D,Dove
+Birds,2,🐦,true,E,Egret
+Birds,2,🐦,true,F,Falcon
+Birds,2,🐦,true,G,Goose
+Birds,2,🐦,true,H,Heron
+Birds,2,🐦,true,I,Ibis
+Birds,2,🐦,true,J,Jay
+Birds,2,🐦,true,K,Kingfisher
+Birds,2,🐦,true,L,Lark
+Birds,2,🐦,true,M,Magpie
+Birds,2,🐦,true,N,Nighthawk
+Birds,2,🐦,true,O,Osprey
+Birds,2,🐦,true,P,Parrot
+Birds,2,🐦,true,Q,Quail
+Birds,2,🐦,true,R,Robin
+Birds,2,🐦,true,S,Sparrow
+Birds,2,🐦,true,T,Toucan
+Birds,2,🐦,true,U,Umbrellabird
+Birds,2,🐦,true,V,Vulture
+Birds,2,🐦,true,W,Woodpecker
+Birds,2,🐦,true,X,Xenops
+Birds,2,🐦,true,Y,Yellowhammer
+Birds,2,🐦,true,Z,Zebra finch
+Brands,1,🏷️,true,A,Adidas
+Brands,1,🏷️,true,B,Bose
+Brands,1,🏷️,true,C,Canon
+Brands,1,🏷️,true,D,Dyson
+Brands,1,🏷️,true,E,Epson
+Brands,1,🏷️,true,F,Fujifilm
+Brands,1,🏷️,true,G,Gucci
+Brands,1,🏷️,true,H,Honda
+Brands,1,🏷️,true,I,Ikea
+Brands,1,🏷️,true,J,JBL
+Brands,1,🏷️,true,K,Kellogg's
+Brands,1,🏷️,true,L,Lego
+Brands,1,🏷️,true,M,Microsoft
+Brands,1,🏷️,true,N,Nike
+Brands,1,🏷️,true,O,Oreo
+Brands,1,🏷️,true,P,Puma
+Brands,1,🏷️,true,Q,Qantas
+Brands,1,🏷️,true,R,Rolex
+Brands,1,🏷️,true,S,Samsung
+Brands,1,🏷️,true,T,Toyota
+Brands,1,🏷️,true,U,Uniqlo
+Brands,1,🏷️,true,V,Visa
+Brands,1,🏷️,true,W,Weber
+Brands,1,🏷️,true,X,Xerox
+Brands,1,🏷️,true,Y,Yamaha
+Brands,1,🏷️,true,Z,Zara
+Car Brands,2,🚗,true,A,Audi
+Car Brands,2,🚗,true,B,BMW
+Car Brands,2,🚗,true,C,Chevrolet
+Car Brands,2,🚗,true,D,Dodge
+Car Brands,2,🚗,true,E,Everus
+Car Brands,2,🚗,true,F,Fiat
+Car Brands,2,🚗,true,G,GMC
+Car Brands,2,🚗,true,H,Honda
+Car Brands,2,🚗,true,I,Isuzu
+Car Brands,2,🚗,true,J,Jeep
+Car Brands,2,🚗,true,K,Kia
+Car Brands,2,🚗,true,L,Lexus
+Car Brands,2,🚗,true,M,Mazda
+Car Brands,2,🚗,true,N,Nissan
+Car Brands,2,🚗,true,O,Opel
+Car Brands,2,🚗,true,P,Peugeot
+Car Brands,2,🚗,true,Q,Qoros
+Car Brands,2,🚗,true,R,Renault
+Car Brands,2,🚗,true,S,Subaru
+Car Brands,2,🚗,true,T,Toyota
+Car Brands,2,🚗,true,U,UAZ
+Car Brands,2,🚗,true,V,Volvo
+Car Brands,2,🚗,true,W,Wuling
+Car Brands,2,🚗,true,X,XPeng
+Car Brands,2,🚗,true,Y,Yamaha
+Car Brands,2,🚗,true,Z,Zotye
+Cities,1,🏙️,true,A,Amsterdam
+Cities,1,🏙️,true,B,Berlin
+Cities,1,🏙️,true,C,Chicago
+Cities,1,🏙️,true,D,Dubai
+Cities,1,🏙️,true,E,Edinburgh
+Cities,1,🏙️,true,F,Florence
+Cities,1,🏙️,true,G,Geneva
+Cities,1,🏙️,true,H,Houston
+Cities,1,🏙️,true,I,Istanbul
+Cities,1,🏙️,true,J,Jakarta
+Cities,1,🏙️,true,K,Kyoto
+Cities,1,🏙️,true,L,London
+Cities,1,🏙️,true,M,Madrid
+Cities,1,🏙️,true,N,Nairobi
+Cities,1,🏙️,true,O,Oslo
+Cities,1,🏙️,true,P,Paris
+Cities,1,🏙️,true,Q,Quebec
+Cities,1,🏙️,true,R,Rome
+Cities,1,🏙️,true,S,Sydney
+Cities,1,🏙️,true,T,Tokyo
+Cities,1,🏙️,true,U,Utrecht
+Cities,1,🏙️,true,V,Vienna
+Cities,1,🏙️,true,W,Warsaw
+Cities,1,🏙️,true,X,Xiamen
+Cities,1,🏙️,true,Y,Yokohama
+Cities,1,🏙️,true,Z,Zurich
+Countries,2,🌍,true,A,Argentina
+Countries,2,🌍,true,B,Brazil
+Countries,2,🌍,true,C,Canada
+Countries,2,🌍,true,D,Denmark
+Countries,2,🌍,true,E,Egypt
+Countries,2,🌍,true,F,France
+Countries,2,🌍,true,G,Germany
+Countries,2,🌍,true,H,Hungary
+Countries,2,🌍,true,I,India
+Countries,2,🌍,true,J,Japan
+Countries,2,🌍,true,K,Kenya
+Countries,2,🌍,true,L,Laos
+Countries,2,🌍,true,M,Mexico
+Countries,2,🌍,true,N,Norway
+Countries,2,🌍,true,O,Oman
+Countries,2,🌍,true,P,Peru
+Countries,2,🌍,true,Q,Qatar
+Countries,2,🌍,true,R,Romania
+Countries,2,🌍,true,S,Spain
+Countries,2,🌍,true,T,Turkey
+Countries,2,🌍,true,U,Uganda
+Countries,2,🌍,true,V,Vietnam
+Countries,2,🌍,true,W,Wales
+Countries,2,🌍,true,Y,Yemen
+Countries,2,🌍,true,Z,Zambia
+Drinks,2,🥤,true,A,Americano
+Drinks,2,🥤,true,B,Beer
+Drinks,2,🥤,true,C,Cider
+Drinks,2,🥤,true,D,Daiquiri
+Drinks,2,🥤,true,E,Espresso
+Drinks,2,🥤,true,F,Fanta
+Drinks,2,🥤,true,G,Gatorade
+Drinks,2,🥤,true,H,Hot chocolate
+Drinks,2,🥤,true,I,Iced tea
+Drinks,2,🥤,true,J,Juice
+Drinks,2,🥤,true,K,Kombucha
+Drinks,2,🥤,true,L,Lemonade
+Drinks,2,🥤,true,M,Milk
+Drinks,2,🥤,true,N,Negroni
+Drinks,2,🥤,true,O,Orange juice
+Drinks,2,🥤,true,P,Pepsi
+Drinks,2,🥤,true,R,Rooibos tea
+Drinks,2,🥤,true,S,Smoothie
+Drinks,2,🥤,true,T,Tea
+Drinks,2,🥤,true,U,Umeshu
+Drinks,2,🥤,true,V,Vodka
+Drinks,2,🥤,true,W,Water
+Drinks,2,🥤,true,X,Xeres sherry
+Drinks,2,🥤,true,Y,Yakult
+Drinks,2,🥤,true,Z,Zobo
+Fish,2,🐟,true,A,Anchovy
+Fish,2,🐟,true,B,Bass
+Fish,2,🐟,true,C,Carp
+Fish,2,🐟,true,D,Dory
+Fish,2,🐟,true,E,Eel
+Fish,2,🐟,true,F,Flounder
+Fish,2,🐟,true,G,Grouper
+Fish,2,🐟,true,H,Herring
+Fish,2,🐟,true,I,Ide
+Fish,2,🐟,true,J,Jackfish
+Fish,2,🐟,true,K,Koi
+Fish,2,🐟,true,L,Ling
+Fish,2,🐟,true,M,Mackerel
+Fish,2,🐟,true,N,Needlefish
+Fish,2,🐟,true,O,Oscar
+Fish,2,🐟,true,P,Pike
+Fish,2,🐟,true,Q,Queenfish
+Fish,2,🐟,true,R,Roach
+Fish,2,🐟,true,S,Salmon
+Fish,2,🐟,true,T,Trout
+Fish,2,🐟,true,U,Umbra
+Fish,2,🐟,true,V,Vendace
+Fish,2,🐟,true,W,Walleye
+Fish,2,🐟,true,X,X-ray tetra
+Fish,2,🐟,true,Y,Yellowtail
+Fish,2,🐟,true,Z,Zander
+Flowers,1,🌸,true,A,Azalea
+Flowers,1,🌸,true,B,Begonia
+Flowers,1,🌸,true,C,Carnation
+Flowers,1,🌸,true,D,Daisy
+Flowers,1,🌸,true,E,Edelweiss
+Flowers,1,🌸,true,F,Freesia
+Flowers,1,🌸,true,G,Gardenia
+Flowers,1,🌸,true,H,Hibiscus
+Flowers,1,🌸,true,I,Iris
+Flowers,1,🌸,true,J,Jasmine
+Flowers,1,🌸,true,K,Kangaroo paw
+Flowers,1,🌸,true,L,Lavender
+Flowers,1,🌸,true,M,Magnolia
+Flowers,1,🌸,true,N,Narcissus
+Flowers,1,🌸,true,O,Orchid
+Flowers,1,🌸,true,P,Peony
+Flowers,1,🌸,true,Q,Queen Anne's lace
+Flowers,1,🌸,true,R,Rose
+Flowers,1,🌸,true,S,Sunflower
+Flowers,1,🌸,true,T,Tulip
+Flowers,1,🌸,true,U,Ulex
+Flowers,1,🌸,true,V,Violet
+Flowers,1,🌸,true,W,Wisteria
+Flowers,1,🌸,true,X,Xerochrysum
+Flowers,1,🌸,true,Y,Yarrow
+Flowers,1,🌸,true,Z,Zinnia
+Foods,1,🍽️,true,A,Avocado
+Foods,1,🍽️,true,B,Bagel
+Foods,1,🍽️,true,C,Croissant
+Foods,1,🍽️,true,D,Dumpling
+Foods,1,🍽️,true,E,Eclair
+Foods,1,🍽️,true,F,Falafel
+Foods,1,🍽️,true,G,Granola
+Foods,1,🍽️,true,H,Hamburger
+Foods,1,🍽️,true,I,Ice cream
+Foods,1,🍽️,true,J,Jam
+Foods,1,🍽️,true,K,Kebab
+Foods,1,🍽️,true,L,Lasagna
+Foods,1,🍽️,true,M,Meatballs
+Foods,1,🍽️,true,N,Noodles
+Foods,1,🍽️,true,O,Omelette
+Foods,1,🍽️,true,P,Pizza
+Foods,1,🍽️,true,Q,Quinoa
+Foods,1,🍽️,true,R,Ravioli
+Foods,1,🍽️,true,S,Sandwich
+Foods,1,🍽️,true,T,Tacos
+Foods,1,🍽️,true,U,Udon
+Foods,1,🍽️,true,V,Vanilla slice
+Foods,1,🍽️,true,W,Waffles
+Foods,1,🍽️,true,X,Xacuti
+Foods,1,🍽️,true,Y,Yogurt
+Foods,1,🍽️,true,Z,Ziti
+Fruits,1,🍎,true,A,Apple
+Fruits,1,🍎,true,B,Banana
+Fruits,1,🍎,true,C,Cherry
+Fruits,1,🍎,true,D,Date
+Fruits,1,🍎,true,E,Elderberry
+Fruits,1,🍎,true,F,Fig
+Fruits,1,🍎,true,G,Grape
+Fruits,1,🍎,true,H,Honeydew
+Fruits,1,🍎,true,I,Imbe
+Fruits,1,🍎,true,J,Jackfruit
+Fruits,1,🍎,true,K,Kiwi
+Fruits,1,🍎,true,L,Lemon
+Fruits,1,🍎,true,M,Mango
+Fruits,1,🍎,true,N,Nectarine
+Fruits,1,🍎,true,O,Orange
+Fruits,1,🍎,true,P,Peach
+Fruits,1,🍎,true,Q,Quince
+Fruits,1,🍎,true,R,Raspberry
+Fruits,1,🍎,true,S,Strawberry
+Fruits,1,🍎,true,T,Tangerine
+Fruits,1,🍎,true,U,Ugli fruit
+Fruits,1,🍎,true,V,Voavanga
+Fruits,1,🍎,true,W,Watermelon
+Fruits,1,🍎,true,X,Xigua
+Fruits,1,🍎,true,Y,Yellow passion fruit
+Fruits,1,🍎,true,Z,Ziziphus
+Household Objects,1,🏠,true,A,Alarm clock
+Household Objects,1,🏠,true,B,Basket
+Household Objects,1,🏠,true,C,Cushion
+Household Objects,1,🏠,true,D,Doorbell
+Household Objects,1,🏠,true,E,Envelope
+Household Objects,1,🏠,true,F,Fan
+Household Objects,1,🏠,true,G,Glass
+Household Objects,1,🏠,true,H,Hanger
+Household Objects,1,🏠,true,I,Iron
+Household Objects,1,🏠,true,J,Jug
+Household Objects,1,🏠,true,K,Kettle
+Household Objects,1,🏠,true,L,Lamp
+Household Objects,1,🏠,true,M,Mirror
+Household Objects,1,🏠,true,N,Notebook
+Household Objects,1,🏠,true,O,Ottoman
+Household Objects,1,🏠,true,P,Pillow
+Household Objects,1,🏠,true,Q,Quilt
+Household Objects,1,🏠,true,R,Rug
+Household Objects,1,🏠,true,S,Spoon
+Household Objects,1,🏠,true,T,Toaster
+Household Objects,1,🏠,true,U,Umbrella
+Household Objects,1,🏠,true,V,Vase
+Household Objects,1,🏠,true,W,Wardrobe
+Household Objects,1,🏠,true,Y,Yarn basket
+Household Objects,1,🏠,true,Z,Zipper bag
+Jobs,1,💼,true,A,Accountant
+Jobs,1,💼,true,B,Baker
+Jobs,1,💼,true,C,Chef
+Jobs,1,💼,true,D,Dentist
+Jobs,1,💼,true,E,Engineer
+Jobs,1,💼,true,F,Firefighter
+Jobs,1,💼,true,G,Gardener
+Jobs,1,💼,true,H,Hairdresser
+Jobs,1,💼,true,I,Inspector
+Jobs,1,💼,true,J,Journalist
+Jobs,1,💼,true,K,Keycutter
+Jobs,1,💼,true,L,Lawyer
+Jobs,1,💼,true,M,Mechanic
+Jobs,1,💼,true,N,Nurse
+Jobs,1,💼,true,O,Optician
+Jobs,1,💼,true,P,Plumber
+Jobs,1,💼,true,Q,Quality analyst
+Jobs,1,💼,true,R,Receptionist
+Jobs,1,💼,true,S,Scientist
+Jobs,1,💼,true,T,Teacher
+Jobs,1,💼,true,U,Upholsterer
+Jobs,1,💼,true,V,Veterinarian
+Jobs,1,💼,true,W,Writer
+Jobs,1,💼,true,X,X-ray technician
+Jobs,1,💼,true,Y,Yoga instructor
+Jobs,1,💼,true,Z,Zoologist
+Kitchen Items,1,🍳,true,A,Apron
+Kitchen Items,1,🍳,true,B,Blender
+Kitchen Items,1,🍳,true,C,Colander
+Kitchen Items,1,🍳,true,D,Dish rack
+Kitchen Items,1,🍳,true,E,Egg slicer
+Kitchen Items,1,🍳,true,F,Frypan
+Kitchen Items,1,🍳,true,G,Grater
+Kitchen Items,1,🍳,true,H,Hob
+Kitchen Items,1,🍳,true,I,Ice tray
+Kitchen Items,1,🍳,true,J,Juicer
+Kitchen Items,1,🍳,true,K,Kettle
+Kitchen Items,1,🍳,true,L,Ladle
+Kitchen Items,1,🍳,true,M,Measuring cup
+Kitchen Items,1,🍳,true,N,Nutcracker
+Kitchen Items,1,🍳,true,O,Oven mitt
+Kitchen Items,1,🍳,true,P,Peeler
+Kitchen Items,1,🍳,true,Q,Quart jug
+Kitchen Items,1,🍳,true,R,Rolling pin
+Kitchen Items,1,🍳,true,S,Spatula
+Kitchen Items,1,🍳,true,T,Tongs
+Kitchen Items,1,🍳,true,U,Utensil holder
+Kitchen Items,1,🍳,true,V,Vegetable peeler
+Kitchen Items,1,🍳,true,W,Whisk
+Kitchen Items,1,🍳,true,Y,Yogurt maker
+Kitchen Items,1,🍳,true,Z,Zester
+Movies,2,🎬,true,A,Avatar
+Movies,2,🎬,true,B,Barbie
+Movies,2,🎬,true,C,Casablanca
+Movies,2,🎬,true,D,Dune
+Movies,2,🎬,true,E,Eternals
+Movies,2,🎬,true,F,Frozen
+Movies,2,🎬,true,G,Gladiator
+Movies,2,🎬,true,H,Heat
+Movies,2,🎬,true,I,Inception
+Movies,2,🎬,true,J,Jaws
+Movies,2,🎬,true,K,Kill Bill
+Movies,2,🎬,true,L,Lincoln
+Movies,2,🎬,true,M,Memento
+Movies,2,🎬,true,N,Notting Hill
+Movies,2,🎬,true,O,Oppenheimer
+Movies,2,🎬,true,P,Parasite
+Movies,2,🎬,true,Q,Quiz Show
+Movies,2,🎬,true,R,Rocky
+Movies,2,🎬,true,S,Skyfall
+Movies,2,🎬,true,T,Titanic
+Movies,2,🎬,true,U,Up
+Movies,2,🎬,true,V,Vertigo
+Movies,2,🎬,true,W,Whiplash
+Movies,2,🎬,true,X,X-Men
+Movies,2,🎬,true,Y,Yesterday
+Movies,2,🎬,true,Z,Zodiac
+Musical Instruments,2,🎵,true,A,Accordion
+Musical Instruments,2,🎵,true,B,Banjo
+Musical Instruments,2,🎵,true,C,Cello
+Musical Instruments,2,🎵,true,D,Drums
+Musical Instruments,2,🎵,true,E,Euphonium
+Musical Instruments,2,🎵,true,F,Flute
+Musical Instruments,2,🎵,true,G,Guitar
+Musical Instruments,2,🎵,true,H,Harmonica
+Musical Instruments,2,🎵,true,I,Irish flute
+Musical Instruments,2,🎵,true,J,Jaw harp
+Musical Instruments,2,🎵,true,K,Keyboard
+Musical Instruments,2,🎵,true,L,Lute
+Musical Instruments,2,🎵,true,M,Mandolin
+Musical Instruments,2,🎵,true,N,Nyckelharpa
+Musical Instruments,2,🎵,true,O,Oboe
+Musical Instruments,2,🎵,true,P,Piano
+Musical Instruments,2,🎵,true,Q,Quena
+Musical Instruments,2,🎵,true,R,Recorder
+Musical Instruments,2,🎵,true,S,Saxophone
+Musical Instruments,2,🎵,true,T,Trumpet
+Musical Instruments,2,🎵,true,U,Ukulele
+Musical Instruments,2,🎵,true,V,Violin
+Musical Instruments,2,🎵,true,W,Wood block
+Musical Instruments,2,🎵,true,X,Xylophone
+Musical Instruments,2,🎵,true,Y,Yidaki
+Musical Instruments,2,🎵,true,Z,Zither
+Singers,2,🎤,true,A,Adele
+Singers,2,🎤,true,B,Beyonce
+Singers,2,🎤,true,C,Cher
+Singers,2,🎤,true,D,Drake
+Singers,2,🎤,true,E,Ed Sheeran
+Singers,2,🎤,true,F,Frank Sinatra
+Singers,2,🎤,true,G,George Michael
+Singers,2,🎤,true,H,Halsey
+Singers,2,🎤,true,I,Ice Spice
+Singers,2,🎤,true,J,Janet Jackson
+Singers,2,🎤,true,K,Katy Perry
+Singers,2,🎤,true,L,Lizzo
+Singers,2,🎤,true,M,Madonna
+Singers,2,🎤,true,N,Neil Diamond
+Singers,2,🎤,true,O,Olivia Rodrigo
+Singers,2,🎤,true,P,Pink
+Singers,2,🎤,true,Q,Queen Latifah
+Singers,2,🎤,true,R,Rihanna
+Singers,2,🎤,true,S,Shakira
+Singers,2,🎤,true,T,Taylor Swift
+Singers,2,🎤,true,U,Usher
+Singers,2,🎤,true,V,Van Morrison
+Singers,2,🎤,true,W,Whitney Houston
+Singers,2,🎤,true,X,XXXTentacion
+Singers,2,🎤,true,Y,Yolanda Adams
+Singers,2,🎤,true,Z,Zayn
+Songs,2,🎶,true,A,Africa
+Songs,2,🎶,true,B,Bad Romance
+Songs,2,🎶,true,C,Clocks
+Songs,2,🎶,true,D,Dancing Queen
+Songs,2,🎶,true,E,Easy On Me
+Songs,2,🎶,true,F,Firework
+Songs,2,🎶,true,G,Grenade
+Songs,2,🎶,true,H,Hello
+Songs,2,🎶,true,I,Imagine
+Songs,2,🎶,true,J,Jolene
+Songs,2,🎶,true,K,Karma
+Songs,2,🎶,true,L,Let It Be
+Songs,2,🎶,true,M,Mirrors
+Songs,2,🎶,true,N,No Scrubs
+Songs,2,🎶,true,O,One Kiss
+Songs,2,🎶,true,P,Poker Face
+Songs,2,🎶,true,Q,Queen of Hearts
+Songs,2,🎶,true,R,Rolling in the Deep
+Songs,2,🎶,true,S,Shape of You
+Songs,2,🎶,true,T,Thriller
+Songs,2,🎶,true,U,Umbrella
+Songs,2,🎶,true,V,Viva La Vida
+Songs,2,🎶,true,W,Wonderwall
+Songs,2,🎶,true,X,XO
+Songs,2,🎶,true,Y,Yellow
+Songs,2,🎶,true,Z,Zombie
+Sports,1,🏅,true,A,Archery
+Sports,1,🏅,true,B,Baseball
+Sports,1,🏅,true,C,Cricket
+Sports,1,🏅,true,D,Diving
+Sports,1,🏅,true,E,Equestrian
+Sports,1,🏅,true,F,Fencing
+Sports,1,🏅,true,G,Golf
+Sports,1,🏅,true,H,Hockey
+Sports,1,🏅,true,I,Ice skating
+Sports,1,🏅,true,J,Judo
+Sports,1,🏅,true,K,Kayaking
+Sports,1,🏅,true,L,Lacrosse
+Sports,1,🏅,true,M,Marathon
+Sports,1,🏅,true,N,Netball
+Sports,1,🏅,true,O,Orienteering
+Sports,1,🏅,true,P,Polo
+Sports,1,🏅,true,Q,Quad biking
+Sports,1,🏅,true,R,Rugby
+Sports,1,🏅,true,S,Soccer
+Sports,1,🏅,true,T,Tennis
+Sports,1,🏅,true,U,Ultimate frisbee
+Sports,1,🏅,true,V,Volleyball
+Sports,1,🏅,true,W,Wrestling
+Sports,1,🏅,true,X,Xare
+Sports,1,🏅,true,Y,Yoga
+Sports,1,🏅,true,Z,Zumba
+TV Shows,2,📺,true,A,Arrested Development
+TV Shows,2,📺,true,B,Breaking Bad
+TV Shows,2,📺,true,C,Chernobyl
+TV Shows,2,📺,true,D,Dexter
+TV Shows,2,📺,true,E,Euphoria
+TV Shows,2,📺,true,F,Friends
+TV Shows,2,📺,true,G,Glee
+TV Shows,2,📺,true,H,House
+TV Shows,2,📺,true,I,Iron Chef
+TV Shows,2,📺,true,J,Jeopardy!
+TV Shows,2,📺,true,K,Killing Eve
+TV Shows,2,📺,true,L,Lost
+TV Shows,2,📺,true,M,Mad Men
+TV Shows,2,📺,true,N,Narcos
+TV Shows,2,📺,true,O,Ozark
+TV Shows,2,📺,true,P,Peaky Blinders
+TV Shows,2,📺,true,Q,QI
+TV Shows,2,📺,true,R,Rick and Morty
+TV Shows,2,📺,true,S,Seinfeld
+TV Shows,2,📺,true,T,The Office
+TV Shows,2,📺,true,T,The X-Files
+TV Shows,2,📺,true,U,Utopia
+TV Shows,2,📺,true,V,Veep
+TV Shows,2,📺,true,W,Wednesday
+TV Shows,2,📺,true,Y,Yellowstone
+TV Shows,2,📺,true,Z,Z Nation
+Tools,1,🧰,true,A,Axe
+Tools,1,🧰,true,B,Brush
+Tools,1,🧰,true,C,Chisel
+Tools,1,🧰,true,D,Drill
+Tools,1,🧰,true,E,Extension ladder
+Tools,1,🧰,true,F,File
+Tools,1,🧰,true,G,Gauge
+Tools,1,🧰,true,H,Hammer
+Tools,1,🧰,true,I,Impact driver
+Tools,1,🧰,true,J,Jack
+Tools,1,🧰,true,K,Knife
+Tools,1,🧰,true,L,Level
+Tools,1,🧰,true,M,Mallet
+Tools,1,🧰,true,N,Nailer
+Tools,1,🧰,true,O,Oil can
+Tools,1,🧰,true,P,Pliers
+Tools,1,🧰,true,Q,Quick clamp
+Tools,1,🧰,true,R,Ratchet
+Tools,1,🧰,true,S,Saw
+Tools,1,🧰,true,T,Tape measure
+Tools,1,🧰,true,U,Utility knife
+Tools,1,🧰,true,V,Vice
+Tools,1,🧰,true,W,Wrench
+Tools,1,🧰,true,X,X-Acto knife
+Tools,1,🧰,true,Y,Yardstick
+Tools,1,🧰,true,Z,Zip tie
+Trees,2,🌳,true,A,Ash
+Trees,2,🌳,true,B,Birch
+Trees,2,🌳,true,C,Cedar
+Trees,2,🌳,true,D,Dogwood
+Trees,2,🌳,true,E,Elm
+Trees,2,🌳,true,F,Fir
+Trees,2,🌳,true,G,Ginkgo
+Trees,2,🌳,true,H,Hawthorn
+Trees,2,🌳,true,I,Ironwood
+Trees,2,🌳,true,J,Juniper
+Trees,2,🌳,true,K,Kapok
+Trees,2,🌳,true,L,Linden
+Trees,2,🌳,true,M,Maple
+Trees,2,🌳,true,N,Nutmeg tree
+Trees,2,🌳,true,O,Oak
+Trees,2,🌳,true,P,Pine
+Trees,2,🌳,true,Q,Quince tree
+Trees,2,🌳,true,R,Redwood
+Trees,2,🌳,true,S,Spruce
+Trees,2,🌳,true,T,Teak
+Trees,2,🌳,true,U,Umbrella tree
+Trees,2,🌳,true,W,Willow
+Trees,2,🌳,true,X,Xylosma
+Trees,2,🌳,true,Y,Yew
+Trees,2,🌳,true,Z,Zelkova
+Vegetables,2,🥕,true,A,Asparagus
+Vegetables,2,🥕,true,B,Beetroot
+Vegetables,2,🥕,true,C,Cabbage
+Vegetables,2,🥕,true,D,Daikon
+Vegetables,2,🥕,true,E,Eggplant
+Vegetables,2,🥕,true,F,Fennel
+Vegetables,2,🥕,true,G,Garlic
+Vegetables,2,🥕,true,H,Horseradish
+Vegetables,2,🥕,true,I,Iceberg lettuce
+Vegetables,2,🥕,true,J,Jalapeno
+Vegetables,2,🥕,true,K,Kale
+Vegetables,2,🥕,true,L,Leek
+Vegetables,2,🥕,true,M,Mushroom
+Vegetables,2,🥕,true,N,Nori
+Vegetables,2,🥕,true,O,Onion
+Vegetables,2,🥕,true,P,Parsnip
+Vegetables,2,🥕,true,R,Radish
+Vegetables,2,🥕,true,S,Spinach
+Vegetables,2,🥕,true,T,Tomato
+Vegetables,2,🥕,true,U,Ube
+Vegetables,2,🥕,true,V,Vidalia onion
+Vegetables,2,🥕,true,W,Watercress
+Vegetables,2,🥕,true,Y,Yam
+Vegetables,2,🥕,true,Z,Zucchini

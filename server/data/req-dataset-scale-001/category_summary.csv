@@ -1,0 +1,28 @@
+categoryName,difficulty,emoji,answerCount,lettersCovered,missingLetters
+Animals,1,🐾,26,26,
+Cities,1,🏙️,26,26,
+Countries,2,🌍,25,25,X
+Foods,1,🍽️,26,26,
+Fruits,1,🍎,26,26,
+Vegetables,2,🥕,24,24,QX
+Drinks,2,🥤,25,25,Q
+Jobs,1,💼,26,26,
+Household Objects,1,🏠,25,25,X
+Kitchen Items,1,🍳,25,25,X
+Tools,1,🧰,26,26,
+Musical Instruments,2,🎵,26,26,
+Flowers,1,🌸,26,26,
+Trees,2,🌳,25,25,V
+Birds,2,🐦,26,26,
+Fish,2,🐟,26,26,
+Sports,1,🏅,26,26,
+Brands,1,🏷️,26,26,
+Car Brands,2,🚗,26,26,
+TV Shows,2,📺,26,25,X
+Movies,2,🎬,26,26,
+Singers,2,🎤,26,26,
+Songs,2,🎶,26,26,
+5-letter Nouns,3,📖,26,26,
+6-letter Nouns,3,📚,26,26,
+7-letter Nouns,3,📝,26,26,
+6-letter Adverbs,3,🔤,21,21,DQTXZ

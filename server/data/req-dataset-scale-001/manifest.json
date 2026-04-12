@@ -1,0 +1,22 @@
+{
+  "name": "AAA Production Dataset",
+  "files": [
+    "aaa_production_dataset.csv",
+    "category_summary.csv"
+  ],
+  "schema": [
+    "categoryName",
+    "difficulty",
+    "emoji",
+    "enabled",
+    "letter",
+    "answer"
+  ],
+  "categoryCount": 27,
+  "rowCount": 690,
+  "notes": [
+    "Curated real-world categories and dictionary-valid word categories.",
+    "Rare letters are included where natural; categories are not padded with junk entries for missing letters.",
+    "Built for gameplay quality over forced A-Z completeness."
+  ]
+}
