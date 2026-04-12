@@ -67,6 +67,8 @@ interface UserState {
   login: (email: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   upgradeGuest: (username: string, email: string, password: string) => Promise<void>;
+  recoverGuestSession: () => Promise<void>;
+  expireSession: () => Promise<void>;
   logout: () => Promise<void>;
   syncFromServer: () => Promise<void>;
 }
@@ -284,6 +286,21 @@ export const useUserStore = create<UserState>((set, get) => ({
     const data = await upgradeGuestApi(username, email, password);
     applyAuthResponse(set, data);
     get().saveData();
+  },
+
+  recoverGuestSession: async () => {
+    const data = await guestApi();
+    applyAuthResponse(set, data);
+    await get().saveData();
+  },
+
+  expireSession: async () => {
+    await clearToken();
+    set({
+      token: null,
+      isAuthenticated: false,
+    });
+    await get().saveData();
   },
 
   logout: async () => {

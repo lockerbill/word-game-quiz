@@ -4,6 +4,7 @@ import type { ValidationResult } from '../engine/AnswerValidator';
 import type { ScoreResult } from '../engine/Scoring';
 import { GameMode } from '../theme/theme';
 import { GameStartResponse, submitGameApi } from '../api/gameApi';
+import { useUserStore } from './userStore';
 
 interface SessionCategory {
   id: number;
@@ -132,10 +133,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       submissionStatus: 'submitting',
     });
 
-    try {
-      const response = await submitGameApi(serverGameId, answers, timeUsed);
+    const applySubmission = (response: Awaited<ReturnType<typeof submitGameApi>>) => {
       const currentSession = get().session;
-      if (!currentSession || currentSession.id !== session.id) return null;
+      if (!currentSession || currentSession.id !== session.id) {
+        return null;
+      }
 
       const nextSession: GameSession = {
         ...currentSession,
@@ -162,7 +164,28 @@ export const useGameStore = create<GameState>((set, get) => ({
       });
 
       return response.score;
-    } catch {
+    };
+
+    try {
+      const response = await submitGameApi(serverGameId, answers, timeUsed);
+      return applySubmission(response);
+    } catch (error: any) {
+      if (error?.response?.status === 401) {
+        const userState = useUserStore.getState();
+
+        if (userState.isGuest) {
+          try {
+            await userState.recoverGuestSession();
+            const response = await submitGameApi(serverGameId, answers, timeUsed);
+            return applySubmission(response);
+          } catch {
+            // Fall through to failed submission state below.
+          }
+        } else {
+          await userState.expireSession();
+        }
+      }
+
       const currentSession = get().session;
       if (!currentSession || currentSession.id !== session.id) return null;
       set({ submissionStatus: 'failed' });

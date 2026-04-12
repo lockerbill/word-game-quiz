@@ -21,6 +21,9 @@ export default function HomeScreen() {
     dailyPlayedDate,
     isLoaded,
     token,
+    isGuest,
+    recoverGuestSession,
+    expireSession,
   } = useUserStore();
   const [daily, setDaily] = useState<{ letter: string; date: string } | null>(null);
   const [dailyError, setDailyError] = useState<string | null>(null);
@@ -38,7 +41,32 @@ export default function HomeScreen() {
         letter: serverDaily.letter,
         date: serverDaily.date,
       });
-    } catch {
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 401) {
+        if (isGuest) {
+          try {
+            await recoverGuestSession();
+            const serverDaily = await getDailyApi();
+            setDaily({
+              letter: serverDaily.letter,
+              date: serverDaily.date,
+            });
+            return;
+          } catch {
+            setDaily(null);
+            setDailyError('Daily challenge is unavailable right now.');
+            return;
+          }
+        }
+
+        await expireSession();
+        setDaily(null);
+        setDailyError('Session expired. Please sign in again.');
+        router.push('/auth/login' as any);
+        return;
+      }
+
       setDaily(null);
       setDailyError('Daily challenge is unavailable right now.');
     } finally {

@@ -21,6 +21,7 @@ import { useGameStore } from '../../src/store/gameStore';
 import { useVoiceStore } from '../../src/store/voiceStore';
 import { startGameApi } from '../../src/api/gameApi';
 import { voiceService } from '../../src/voice';
+import { useUserStore } from '../../src/store/userStore';
 
 export default function GamePlayScreen() {
   const { mode } = useLocalSearchParams<{ mode: string }>();
@@ -64,6 +65,12 @@ export default function GamePlayScreen() {
   const [localAnswer, setLocalAnswer] = useState('');
   const [isStarting, setIsStarting] = useState(true);
   const [startError, setStartError] = useState<string | null>(null);
+  const {
+    isAuthenticated,
+    isGuest,
+    recoverGuestSession,
+    expireSession,
+  } = useUserStore();
 
   const stopVoiceOutput = useCallback(async () => {
     try {
@@ -99,14 +106,41 @@ export default function GamePlayScreen() {
     try {
       const res = await startGameApi(gameMode);
       startGameFromServer(gameMode, res);
-    } catch {
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 401) {
+        if (isGuest) {
+          try {
+            await recoverGuestSession();
+            const res = await startGameApi(gameMode);
+            startGameFromServer(gameMode, res);
+            return;
+          } catch {
+            setStartError('Your guest session expired. Please try again.');
+            return;
+          }
+        }
+
+        await expireSession();
+        router.replace('/auth/login' as any);
+        setStartError('Your session expired. Please sign in again.');
+        return;
+      }
+
       setStartError(
         'We could not reach the game server. Check your connection and try again.',
       );
     } finally {
       setIsStarting(false);
     }
-  }, [gameMode, startGameFromServer]);
+  }, [
+    expireSession,
+    gameMode,
+    isGuest,
+    recoverGuestSession,
+    router,
+    startGameFromServer,
+  ]);
 
   // Start game on mount — server only
   useEffect(() => {
@@ -141,6 +175,12 @@ export default function GamePlayScreen() {
       router.replace('/game/results');
     }
   }, [abortVoiceInput, isFinished, router, stopVoiceOutput]);
+
+  useEffect(() => {
+    if (!isAuthenticated && !isGuest) {
+      router.replace('/auth/login' as any);
+    }
+  }, [isAuthenticated, isGuest, router]);
 
   // Auto-focus the input when question changes
   useEffect(() => {
