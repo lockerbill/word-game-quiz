@@ -6,6 +6,7 @@ import {
   createAnswerApi,
   createCategoryApi,
   createImportJobApi,
+  createImportJobFromCsvUploadApi,
   deleteAnswerApi,
   getImportJobApi,
   listAnswersApi,
@@ -205,6 +206,7 @@ export function ContentPage() {
     string | null
   >(null);
   const [applyImportReason, setApplyImportReason] = useState('');
+  const [uploadCsvFile, setUploadCsvFile] = useState<File | null>(null);
 
   const selectedCategory = useMemo(
     () => categories.data.find((category) => category.id === selectedCategoryId),
@@ -539,17 +541,24 @@ export function ContentPage() {
     setImportMutationError(null);
 
     try {
-      const created = await createImportJobApi({
-        format: importForm.format,
-        payload: importForm.payload,
-        dryRun: importForm.dryRun,
-        reason: importForm.reason,
-      });
+      const created = uploadCsvFile
+        ? await createImportJobFromCsvUploadApi({
+            file: uploadCsvFile,
+            dryRun: importForm.dryRun,
+            reason: importForm.reason,
+          })
+        : await createImportJobApi({
+            format: importForm.format,
+            payload: importForm.payload,
+            dryRun: importForm.dryRun,
+            reason: importForm.reason,
+          });
 
       setImportForm((current) => ({
         ...current,
         reason: '',
       }));
+      setUploadCsvFile(null);
       setSelectedImportJobId(created.id);
       await loadImportJobs();
       await loadImportJobDetail();
@@ -1210,6 +1219,7 @@ export function ContentPage() {
                 Format
                 <select
                   value={importForm.format}
+                  disabled={uploadCsvFile !== null}
                   onChange={(event) => {
                     const format = event.target.value as 'csv' | 'json';
                     setImportForm((current) => ({
@@ -1223,6 +1233,29 @@ export function ContentPage() {
                   <option value="json">JSON</option>
                 </select>
               </label>
+              <label>
+                CSV file upload (optional)
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    setUploadCsvFile(file);
+                    if (file) {
+                      setImportForm((current) => ({
+                        ...current,
+                        format: 'csv',
+                      }));
+                    }
+                  }}
+                />
+              </label>
+              {uploadCsvFile ? (
+                <p className="muted">
+                  Selected file: <strong>{uploadCsvFile.name}</strong> ({' '}
+                  {Math.max(1, Math.round(uploadCsvFile.size / 1024))} KB)
+                </p>
+              ) : null}
               <label className="checkbox-row">
                 <input
                   type="checkbox"
@@ -1241,6 +1274,7 @@ export function ContentPage() {
                 <textarea
                   className="payload-input"
                   value={importForm.payload}
+                  disabled={uploadCsvFile !== null}
                   onChange={(event) =>
                     setImportForm((current) => ({
                       ...current,
@@ -1251,6 +1285,11 @@ export function ContentPage() {
                   required
                 />
               </label>
+              {uploadCsvFile ? (
+                <p className="muted">
+                  CSV upload is active, payload text is ignored for this submit.
+                </p>
+              ) : null}
               <label>
                 Reason
                 <textarea

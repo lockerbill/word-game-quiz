@@ -10,11 +10,16 @@ import {
   Post,
   Query,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import {
+  ApiBody,
   ApiBearerAuth,
+  ApiConsumes,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -31,6 +36,7 @@ import { ApplyImportJobDto } from './dto/apply-import-job.dto.js';
 import { CreateAnswerDto } from './dto/create-answer.dto.js';
 import { CreateCategoryDto } from './dto/create-category.dto.js';
 import { CreateImportJobDto } from './dto/create-import-job.dto.js';
+import { CreateImportJobCsvUploadDto } from './dto/create-import-job-csv-upload.dto.js';
 import { DeleteAnswerDto } from './dto/delete-answer.dto.js';
 import { ListAnswersQueryDto } from './dto/list-answers-query.dto.js';
 import { ListCategoriesQueryDto } from './dto/list-categories-query.dto.js';
@@ -190,6 +196,59 @@ export class AdminContentController {
     @Body() dto: CreateImportJobDto,
   ) {
     return this.adminContentImportService.createImportJob(req.user, dto);
+  }
+
+  @Post('import-jobs/upload-csv')
+  @UseInterceptors(FileInterceptor('file'))
+  @Throttle({
+    default: {
+      limit: adminMutationThrottleLimit,
+      ttl: adminThrottleTtlMs,
+    },
+  })
+  @ApiOperation({
+    summary: 'Create bulk import validation job from uploaded CSV file',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file', 'reason'],
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+        reason: {
+          type: 'string',
+          minLength: 5,
+          maxLength: 500,
+        },
+        dryRun: {
+          type: 'boolean',
+          default: true,
+        },
+      },
+    },
+  })
+  createImportJobFromCsvUpload(
+    @Req() req: AdminContentRequest,
+    @UploadedFile()
+    file:
+      | {
+          originalname?: string;
+          mimetype?: string;
+          size?: number;
+          buffer?: Buffer;
+        }
+      | undefined,
+    @Body() dto: CreateImportJobCsvUploadDto,
+  ) {
+    return this.adminContentImportService.createImportJobFromCsvUpload(
+      req.user,
+      dto,
+      file,
+    );
   }
 
   @Get('import-jobs')

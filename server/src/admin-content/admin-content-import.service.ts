@@ -16,6 +16,7 @@ import {
 import type { User } from '../entities/user.entity.js';
 import { ApplyImportJobDto } from './dto/apply-import-job.dto.js';
 import { CreateImportJobDto } from './dto/create-import-job.dto.js';
+import { CreateImportJobCsvUploadDto } from './dto/create-import-job-csv-upload.dto.js';
 import { ListImportJobsQueryDto } from './dto/list-import-jobs-query.dto.js';
 
 interface AdminActor {
@@ -46,6 +47,13 @@ interface ValidationResult {
   totalRows: number;
 }
 
+interface CsvUploadFile {
+  originalname?: string;
+  mimetype?: string;
+  size?: number;
+  buffer?: Buffer;
+}
+
 @Injectable()
 export class AdminContentImportService {
   constructor(
@@ -59,6 +67,71 @@ export class AdminContentImportService {
   ) {}
 
   async createImportJob(actor: AdminActor, dto: CreateImportJobDto) {
+    return this.createAndPersistImportJob(actor, dto, {
+      source: 'manual_payload',
+    });
+  }
+
+  async createImportJobFromCsvUpload(
+    actor: AdminActor,
+    dto: CreateImportJobCsvUploadDto,
+    file: CsvUploadFile | undefined,
+  ) {
+    if (!file?.buffer) {
+      throw new BadRequestException('CSV file is required');
+    }
+
+    const fileSizeBytes = file.size ?? file.buffer.length;
+    if (fileSizeBytes <= 0) {
+      throw new BadRequestException('Uploaded CSV file is empty');
+    }
+
+    if (fileSizeBytes > 2_000_000) {
+      throw new BadRequestException('Import payload too large (max 2MB)');
+    }
+
+    const fileName = (file.originalname ?? '').trim();
+    const mimeType = (file.mimetype ?? '').trim().toLowerCase();
+    const hasCsvName = fileName.toLowerCase().endsWith('.csv');
+    const allowedMimeTypes = new Set([
+      'text/csv',
+      'application/csv',
+      'application/vnd.ms-excel',
+      'text/plain',
+    ]);
+    const hasAllowedMimeType =
+      mimeType.length > 0 && allowedMimeTypes.has(mimeType);
+    if (!hasCsvName && !hasAllowedMimeType) {
+      throw new BadRequestException('Uploaded file must be a CSV file');
+    }
+
+    const payload = file.buffer.toString('utf8');
+    if (payload.trim().length === 0) {
+      throw new BadRequestException('Uploaded CSV file is empty');
+    }
+
+    return this.createAndPersistImportJob(
+      actor,
+      {
+        format: 'csv',
+        payload,
+        reason: dto.reason,
+        dryRun: dto.dryRun,
+      },
+      {
+        source: 'csv_upload',
+        fileName,
+        mimeType,
+        fileSizeBytes,
+      },
+    );
+  }
+
+  private async createAndPersistImportJob(
+    actor: AdminActor,
+    dto: CreateImportJobDto,
+    metadata: Record<string, unknown>,
+  ) {
     if (dto.payload.length > 2_000_000) {
       throw new BadRequestException('Import payload too large (max 2MB)');
     }
@@ -101,6 +174,7 @@ export class AdminContentImportService {
       metadata: {
         format: dto.format,
         dryRun: saved.dryRun,
+        ...metadata,
       },
     });
 

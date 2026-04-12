@@ -126,6 +126,12 @@ export interface CreateImportJobPayload {
   reason: string;
 }
 
+export interface CreateImportJobCsvUploadPayload {
+  file: File;
+  dryRun?: boolean;
+  reason: string;
+}
+
 export interface ApplyImportJobPayload {
   reason: string;
 }

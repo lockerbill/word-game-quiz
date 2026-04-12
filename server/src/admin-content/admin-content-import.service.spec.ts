@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import type { Repository } from 'typeorm';
 import { AdminContentImportService } from './admin-content-import.service';
 import type { AdminAuditLogService } from '../admin/admin-audit-log.service';
@@ -93,5 +94,50 @@ describe('AdminContentImportService', () => {
         errorCount: 1,
       }),
     );
+  });
+
+  it('creates validated import job from uploaded CSV file', async () => {
+    const { service } = createService();
+
+    const result = await service.createImportJobFromCsvUpload(
+      actor,
+      {
+        reason: 'Upload from moderator CSV file',
+        dryRun: true,
+      },
+      {
+        originalname: 'bulk-import.csv',
+        mimetype: 'text/csv',
+        size: 72,
+        buffer: Buffer.from(
+          'categoryName,letter,answer,difficulty,emoji,enabled\nBoard Games,B,Bingo,2,🎲,true',
+          'utf8',
+        ),
+      },
+    );
+
+    expect(result.status).toBe('validated');
+    expect(result.summary).toEqual(
+      expect.objectContaining({
+        totalRows: 1,
+        validRows: 1,
+        errorCount: 0,
+      }),
+    );
+  });
+
+  it('rejects upload import when file is missing', async () => {
+    const { service } = createService();
+
+    await expect(
+      service.createImportJobFromCsvUpload(
+        actor,
+        {
+          reason: 'Missing upload file test',
+          dryRun: true,
+        },
+        undefined,
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

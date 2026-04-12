@@ -116,9 +116,10 @@ REQ-VOICE-MODE-001 - Voice mode (TTS prompts + microphone answers + typing fallb
   - Add cloud AI voice providers.
 
 REQ-DATASET-SCALE-001 - 10,000+ categories and 100k+ answers
-- Status: PARTIAL (small static dataset + DB seeding)
-- Evidence: `server/src/game-data/categories.ts`, `server/src/game-data/answers.ts`, `server/src/database/seed.service.ts`
+- Status: PARTIAL (batch CSV dataset generated for admin bulk import)
+- Evidence: `server/scripts/generate-dataset-scale-csv.mjs`, `server/data/req-dataset-scale-001/categories_batch_01.csv`, `server/data/req-dataset-scale-001/answers_batch_01.csv`
 - TODO:
+  - Execute admin import jobs and publish content revision to make dataset live.
   - Move selection/validation to DB-first; implement ingestion pipeline.
 
 ---
@@ -257,6 +258,11 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
   - Wired runtime settings consumption into game mode timer/category selection and AI validation behavior.
   - Evidence: `server/src/admin-settings/admin-settings.module.ts`, `server/src/admin-settings/admin-settings.controller.ts`, `server/src/admin-settings/admin-settings.service.ts`, `server/src/entities/admin-settings-revision.entity.ts`
   - Commit: `e65dd38`
+
+- DONE-P1-ADMIN-006 - Add bulk import content by allow uploading csv file
+  - Added multipart CSV upload endpoint at `/api/admin/content/import-jobs/upload-csv` with DTO validation and audit metadata.
+  - Added admin-web CSV file picker path in Bulk Import UI while preserving the existing payload-based flow.
+  - Evidence: `server/src/admin-content/admin-content.controller.ts`, `server/src/admin-content/admin-content-import.service.ts`, `server/src/admin-content/dto/create-import-job-csv-upload.dto.ts`, `admin-web/src/pages/ContentPage.tsx`, `admin-web/src/api/adminContentApi.ts`
 
 ### P2 - Anti-cheat (MVP)
 

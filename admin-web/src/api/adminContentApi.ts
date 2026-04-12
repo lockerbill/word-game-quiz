@@ -5,6 +5,7 @@ import type {
   CreateAnswerPayload,
   CreateCategoryPayload,
   CreateImportJobPayload,
+  CreateImportJobCsvUploadPayload,
   DeleteAnswerPayload,
   ListAnswersQuery,
   ListAnswersResponse,
@@ -114,6 +115,29 @@ export async function createImportJobApi(payload: CreateImportJobPayload) {
   const { data } = await apiClient.post<ContentImportJob>(
     '/admin/content/import-jobs',
     payload,
+  );
+
+  return data;
+}
+
+export async function createImportJobFromCsvUploadApi(
+  payload: CreateImportJobCsvUploadPayload,
+) {
+  const formData = new FormData();
+  formData.append('file', payload.file);
+  formData.append('reason', payload.reason);
+  if (typeof payload.dryRun !== 'undefined') {
+    formData.append('dryRun', String(payload.dryRun));
+  }
+
+  const { data } = await apiClient.post<ContentImportJob>(
+    '/admin/content/import-jobs/upload-csv',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
   );
 
   return data;
