@@ -26,6 +26,19 @@ export class SeedService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
+    const shouldAutoSeedOnBoot =
+      process.env.AUTO_SEED_ON_BOOT === 'true' ||
+      process.env.NODE_ENV !== 'production';
+
+    if (!shouldAutoSeedOnBoot) {
+      this.logger.log('Automatic bootstrap seeding is disabled.');
+      return;
+    }
+
+    await this.seedAll();
+  }
+
+  async seedAll() {
     await this.seedCategories();
     await this.seedAnswers();
     await this.seedDefaultAdminUser();

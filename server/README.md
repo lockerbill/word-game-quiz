@@ -127,6 +127,13 @@ npm run start:dev
 npm run start:debug
 npm run start:prod
 
+# database
+npm run migration:show
+npm run migration:run
+npm run migration:revert
+npm run seed:run
+npm run deploy:prepare
+
 # lint/format
 npm run lint
 npm run format
@@ -144,3 +151,20 @@ npm run test:e2e
 - Stop services: `docker compose down`
 
 For full project setup (client + server), see the root `README.md`.
+
+## GitHub Actions production deploy (Railway)
+
+Workflow: `.github/workflows/deploy-railway-after-ci.yml`
+
+This workflow runs after successful CI pushes to `main`/`master` (or manually via dispatch) and performs:
+
+1. `npm run migration:run` against Railway production variables
+2. `npm run seed:run` against Railway production variables
+3. `railway up` to deploy the `server/` service
+
+Required GitHub secrets:
+
+- `RAILWAY_TOKEN`
+- `RAILWAY_PROJECT_ID`
+- `RAILWAY_ENVIRONMENT_ID`
+- `RAILWAY_SERVICE_ID`
