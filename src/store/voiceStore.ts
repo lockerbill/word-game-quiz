@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { create } from 'zustand';
 import { voiceService } from '../voice';
 
@@ -33,11 +34,47 @@ interface VoiceState extends PersistedVoiceSettings {
 
 const STORAGE_KEY = '@alpha_bucks_voice';
 
+const WEB_SPEECH_PROVIDER_ID = 'web-speech';
+const EXPO_TTS_PROVIDER_ID = 'expo-tts';
+const EXPO_STT_PROVIDER_ID = 'expo-stt';
+
+function getPlatformPreferredTtsProviderId(): string {
+  return Platform.OS === 'web' ? WEB_SPEECH_PROVIDER_ID : EXPO_TTS_PROVIDER_ID;
+}
+
+function getPlatformPreferredSttProviderId(): string {
+  return Platform.OS === 'web' ? WEB_SPEECH_PROVIDER_ID : EXPO_STT_PROVIDER_ID;
+}
+
+async function resolveBestTtsProviderId(preferredId?: string | null): Promise<string> {
+  const preferred = voiceService.getTtsProvider(preferredId || getPlatformPreferredTtsProviderId());
+  const preferredAvailable = await Promise.resolve(preferred.isAvailable());
+  if (preferredAvailable) {
+    return preferred.id;
+  }
+
+  const available = await voiceService.getAvailableTtsProviders();
+  const best = available.find(provider => provider.id !== 'noop') || available[0];
+  return best?.id || 'noop';
+}
+
+async function resolveBestSttProviderId(preferredId?: string | null): Promise<string> {
+  const preferred = voiceService.getSttProvider(preferredId || getPlatformPreferredSttProviderId());
+  const preferredAvailable = await Promise.resolve(preferred.isAvailable());
+  if (preferredAvailable) {
+    return preferred.id;
+  }
+
+  const available = await voiceService.getAvailableSttProviders();
+  const best = available.find(provider => provider.id !== 'noop') || available[0];
+  return best?.id || 'noop';
+}
+
 const defaultSettings: PersistedVoiceSettings = {
   voiceModeEnabled: false,
   autoSpeakQuestion: true,
-  ttsProviderId: 'noop',
-  sttProviderId: 'noop',
+  ttsProviderId: getPlatformPreferredTtsProviderId(),
+  sttProviderId: getPlatformPreferredSttProviderId(),
   locale: 'en-US',
   speechRate: 1,
   speechPitch: 1,
@@ -111,16 +148,45 @@ export const useVoiceStore = create<VoiceState>((set, get) => ({
   loadSettings: async () => {
     try {
       const raw = await AsyncStorage.getItem(STORAGE_KEY);
+
+      const bestTtsProviderId = await resolveBestTtsProviderId();
+      const bestSttProviderId = await resolveBestSttProviderId();
+
       if (!raw) {
-        set({ isLoaded: true });
+        const next = {
+          ...defaultSettings,
+          ttsProviderId: bestTtsProviderId,
+          sttProviderId: bestSttProviderId,
+        };
+        set({ ...next, isLoaded: true });
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
         return;
       }
 
       const parsed = JSON.parse(raw);
       const normalized = normalizePersistedSettings(parsed);
-      set({ ...normalized, isLoaded: true });
+      const migrated: PersistedVoiceSettings = {
+        ...normalized,
+        ttsProviderId:
+          normalized.ttsProviderId === 'noop' ? bestTtsProviderId : normalized.ttsProviderId,
+        sttProviderId:
+          normalized.sttProviderId === 'noop' ? bestSttProviderId : normalized.sttProviderId,
+      };
+      set({ ...migrated, isLoaded: true });
+
+      if (
+        migrated.ttsProviderId !== normalized.ttsProviderId
+        || migrated.sttProviderId !== normalized.sttProviderId
+      ) {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+      }
     } catch {
-      set({ ...defaultSettings, isLoaded: true });
+      const fallback = {
+        ...defaultSettings,
+        ttsProviderId: await resolveBestTtsProviderId(),
+        sttProviderId: await resolveBestSttProviderId(),
+      };
+      set({ ...fallback, isLoaded: true });
     }
   },
 

@@ -111,6 +111,22 @@ npm run ios
 npm run web
 ```
 
+### Voice mode on web
+
+Voice mode is supported in browsers through the Web Speech APIs.
+
+Requirements:
+
+- Use Chrome or Edge (recommended).
+- Allow microphone permission for the site.
+- Run on `https://` (or `http://localhost` for local development).
+
+Behavior:
+
+- The app now auto-selects the best available voice provider on startup.
+- Existing users who previously had voice input/output disabled are auto-migrated to a supported provider when available.
+- If speech recognition is unsupported, the UI shows guidance and typed answers still work as fallback.
+
 ### 4) Run the admin frontend (Vite)
 
 In another terminal:

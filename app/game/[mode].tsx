@@ -51,6 +51,8 @@ export default function GamePlayScreen() {
     isListening,
     lastError,
     setVoiceModeEnabled,
+    setTtsProviderId,
+    setSttProviderId,
     setListening,
     setLastError,
     clearError,
@@ -58,6 +60,105 @@ export default function GamePlayScreen() {
 
   const ttsProvider = voiceService.getTtsProvider(ttsProviderId);
   const sttProvider = voiceService.getSttProvider(sttProviderId);
+  const webSpeechApiDetected =
+    Platform.OS === 'web'
+      ? Boolean(
+          (
+            globalThis as {
+              SpeechRecognition?: unknown;
+              webkitSpeechRecognition?: unknown;
+            }
+          ).SpeechRecognition
+            || (
+              globalThis as {
+                SpeechRecognition?: unknown;
+                webkitSpeechRecognition?: unknown;
+              }
+            ).webkitSpeechRecognition,
+        )
+      : null;
+  const isSecureWebOrigin =
+    Platform.OS === 'web' && typeof window === 'object' ? window.isSecureContext : null;
+
+  const getVoiceInputUnavailableMessage = useCallback((): string => {
+    if (Platform.OS === 'web') {
+      return 'Voice input is unavailable in this browser. Use Chrome or Edge, allow microphone access, and run on HTTPS (or localhost).';
+    }
+    return 'Voice input is unavailable on this device.';
+  }, []);
+
+  const formatSttErrorMessage = useCallback(
+    (message?: string): string => {
+      const raw = (message || '').trim();
+      const normalized = raw.toLowerCase();
+
+      if (
+        normalized.includes('provider is not enabled')
+        || normalized.includes('speech recognition is unavailable')
+        || normalized.includes('web speech recognition is unavailable')
+      ) {
+        return getVoiceInputUnavailableMessage();
+      }
+
+      if (
+        normalized.includes('permission')
+        || normalized.includes('not-allowed')
+        || normalized.includes('service-not-allowed')
+      ) {
+        if (Platform.OS === 'web') {
+          return 'Microphone permission was denied. Allow microphone access in your browser site settings and try again.';
+        }
+        return 'Microphone or speech permission was denied.';
+      }
+
+      if (normalized.includes('network')) {
+        return 'Network issue interrupted voice input. Please try again.';
+      }
+
+      return raw || 'Could not capture voice input.';
+    },
+    [getVoiceInputUnavailableMessage],
+  );
+
+  const resolveActiveTtsProvider = useCallback(async () => {
+    const selected = voiceService.getTtsProvider(ttsProviderId);
+    const selectedAvailable = await Promise.resolve(selected.isAvailable());
+    if (selectedAvailable) {
+      return selected;
+    }
+
+    const availableProviders = await voiceService.getAvailableTtsProviders();
+    const fallback =
+      availableProviders.find(provider => provider.id !== 'noop')
+      || availableProviders[0]
+      || selected;
+
+    if (fallback.id !== ttsProviderId) {
+      setTtsProviderId(fallback.id);
+    }
+
+    return fallback;
+  }, [setTtsProviderId, ttsProviderId]);
+
+  const resolveActiveSttProvider = useCallback(async () => {
+    const selected = voiceService.getSttProvider(sttProviderId);
+    const selectedAvailable = await Promise.resolve(selected.isAvailable());
+    if (selectedAvailable) {
+      return selected;
+    }
+
+    const availableProviders = await voiceService.getAvailableSttProviders();
+    const fallback =
+      availableProviders.find(provider => provider.id !== 'noop')
+      || availableProviders[0]
+      || selected;
+
+    if (fallback.id !== sttProviderId) {
+      setSttProviderId(fallback.id);
+    }
+
+    return fallback;
+  }, [setSttProviderId, sttProviderId]);
 
   const inputRef = useRef<TextInput | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -65,6 +166,9 @@ export default function GamePlayScreen() {
   const [localAnswer, setLocalAnswer] = useState('');
   const [isStarting, setIsStarting] = useState(true);
   const [startError, setStartError] = useState<string | null>(null);
+  const [ttsAvailable, setTtsAvailable] = useState<boolean | null>(null);
+  const [sttAvailable, setSttAvailable] = useState<boolean | null>(null);
+  const [diagnosticsNotice, setDiagnosticsNotice] = useState<string | null>(null);
   const {
     isAuthenticated,
     isGuest,
@@ -209,7 +313,8 @@ export default function GamePlayScreen() {
 
     const speakPrompt = async () => {
       try {
-        const available = await Promise.resolve(ttsProvider.isAvailable());
+        const activeTtsProvider = await resolveActiveTtsProvider();
+        const available = await Promise.resolve(activeTtsProvider.isAvailable());
         if (!available) {
           if (!cancelled) {
             setLastError('Voice playback is unavailable on this device.');
@@ -217,7 +322,7 @@ export default function GamePlayScreen() {
           return;
         }
 
-        await ttsProvider.speak({
+        await activeTtsProvider.speak({
           text: prompt,
           locale,
           rate: speechRate,
@@ -245,9 +350,34 @@ export default function GamePlayScreen() {
     setLastError,
     speechPitch,
     speechRate,
+    resolveActiveTtsProvider,
     ttsProvider,
     voiceModeEnabled,
   ]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const checkVoiceAvailability = async () => {
+      const [nextTtsAvailable, nextSttAvailable] = await Promise.all([
+        Promise.resolve(ttsProvider.isAvailable()),
+        Promise.resolve(sttProvider.isAvailable()),
+      ]);
+
+      if (!mounted) {
+        return;
+      }
+
+      setTtsAvailable(nextTtsAvailable);
+      setSttAvailable(nextSttAvailable);
+    };
+
+    void checkVoiceAvailability();
+
+    return () => {
+      mounted = false;
+    };
+  }, [sttProvider, ttsProvider]);
 
   const goToNext = useCallback(() => {
     if (!session) return;
@@ -299,6 +429,7 @@ export default function GamePlayScreen() {
   const handleVoiceModeToggle = async () => {
     const nextEnabled = !voiceModeEnabled;
     setVoiceModeEnabled(nextEnabled);
+    setDiagnosticsNotice(null);
     clearError();
 
     if (!nextEnabled) {
@@ -312,15 +443,19 @@ export default function GamePlayScreen() {
       return;
     }
 
-    if (isListening || sttProvider.isListening()) {
+    setDiagnosticsNotice(null);
+
+    const activeSttProvider = await resolveActiveSttProvider();
+
+    if (isListening || activeSttProvider.isListening()) {
       await stopVoiceInput();
       return;
     }
 
     clearError();
-    const available = await Promise.resolve(sttProvider.isAvailable());
+    const available = await Promise.resolve(activeSttProvider.isAvailable());
     if (!available) {
-      setLastError('Voice input is unavailable on this device.');
+      setLastError(getVoiceInputUnavailableMessage());
       return;
     }
 
@@ -328,7 +463,7 @@ export default function GamePlayScreen() {
     const contextWord = category?.name || 'this question';
 
     try {
-      await sttProvider.startListening(
+      await activeSttProvider.startListening(
         {
           locale,
           interimResults: true,
@@ -344,7 +479,7 @@ export default function GamePlayScreen() {
           },
           onError: error => {
             setListening(false);
-            setLastError(error.message || 'Could not capture voice input.');
+            setLastError(formatSttErrorMessage(error.message));
           },
           onEnd: () => {
             setListening(false);
@@ -367,6 +502,38 @@ export default function GamePlayScreen() {
       setAnswer(category.id, localAnswer.trim());
     }
     await finishGame();
+  };
+
+  const handleCopyDiagnostics = async () => {
+    const diagnostics = [
+      `TTS: ${ttsProvider.label} (${ttsProvider.id}) - ${
+        ttsAvailable === true ? 'available' : ttsAvailable === false ? 'unavailable' : 'checking'
+      }`,
+      `STT: ${sttProvider.label} (${sttProvider.id}) - ${
+        sttAvailable === true ? 'available' : sttAvailable === false ? 'unavailable' : 'checking'
+      }`,
+      Platform.OS === 'web'
+        ? `Web Speech API: ${webSpeechApiDetected ? 'detected' : 'missing'} | Origin: ${
+            isSecureWebOrigin ? 'secure' : 'not secure'
+          }`
+        : `Platform: ${Platform.OS}`,
+    ].join('\n');
+
+    try {
+      if (
+        typeof navigator === 'object'
+        && navigator.clipboard
+        && typeof navigator.clipboard.writeText === 'function'
+      ) {
+        await navigator.clipboard.writeText(diagnostics);
+        setDiagnosticsNotice('Diagnostics copied.');
+        return;
+      }
+
+      setDiagnosticsNotice('Clipboard is unavailable on this platform.');
+    } catch {
+      setDiagnosticsNotice('Could not copy diagnostics right now.');
+    }
   };
 
   if (isStarting) {
@@ -540,6 +707,45 @@ export default function GamePlayScreen() {
               <Text style={styles.voiceStatusText}>
                 Listening... latest transcript replaces the input.
               </Text>
+            )}
+
+            {voiceModeEnabled && (
+              <View style={styles.voiceDiagnosticsCard}>
+                <Text style={styles.voiceDiagnosticsTitle}>Voice diagnostics</Text>
+                <Text style={styles.voiceDiagnosticsText}>
+                  TTS: {ttsProvider.label} ({ttsProvider.id}) -{' '}
+                  {ttsAvailable === true
+                    ? 'available'
+                    : ttsAvailable === false
+                      ? 'unavailable'
+                      : 'checking'}
+                </Text>
+                <Text style={styles.voiceDiagnosticsText}>
+                  STT: {sttProvider.label} ({sttProvider.id}) -{' '}
+                  {sttAvailable === true
+                    ? 'available'
+                    : sttAvailable === false
+                      ? 'unavailable'
+                      : 'checking'}
+                </Text>
+                {Platform.OS === 'web' && (
+                  <Text style={styles.voiceDiagnosticsText}>
+                    Web Speech API: {webSpeechApiDetected ? 'detected' : 'missing'}
+                    {' | '}Origin:{' '}
+                    {isSecureWebOrigin ? 'secure' : 'not secure'}
+                  </Text>
+                )}
+                <TouchableOpacity
+                  style={styles.voiceDiagnosticsCopyBtn}
+                  onPress={() => void handleCopyDiagnostics()}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.voiceDiagnosticsCopyBtnText}>Copy diagnostics</Text>
+                </TouchableOpacity>
+                {diagnosticsNotice && (
+                  <Text style={styles.voiceDiagnosticsNotice}>{diagnosticsNotice}</Text>
+                )}
+              </View>
             )}
 
             {voiceModeEnabled && lastError && (
@@ -793,6 +999,47 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'left',
     marginBottom: Spacing.sm,
+  },
+  voiceDiagnosticsCard: {
+    width: '100%',
+    borderRadius: BorderRadius.md,
+    paddingVertical: 8,
+    paddingHorizontal: Spacing.sm,
+    backgroundColor: Colors.surfaceLight,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    marginBottom: Spacing.sm,
+    gap: 2,
+  },
+  voiceDiagnosticsTitle: {
+    color: Colors.textPrimary,
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  voiceDiagnosticsText: {
+    color: Colors.textSecondary,
+    fontSize: 11,
+  },
+  voiceDiagnosticsCopyBtn: {
+    marginTop: 6,
+    alignSelf: 'flex-start',
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+    backgroundColor: Colors.surface,
+  },
+  voiceDiagnosticsCopyBtnText: {
+    color: Colors.textPrimary,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  voiceDiagnosticsNotice: {
+    color: Colors.textTertiary,
+    fontSize: 11,
+    marginTop: 4,
   },
   voiceErrorCard: {
     width: '100%',
