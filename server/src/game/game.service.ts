@@ -24,6 +24,7 @@ import {
 } from '../game-data/scoring.js';
 import { AiValidationService } from '../ai-validation/ai-validation.service.js';
 import type { ValidationReason } from '../ai-validation/ai-validation.types.js';
+import { createDailyRandom, shuffleWithRandom } from './daily-rng.js';
 
 // In-memory pending games (could be Redis for multi-server)
 interface PendingGame {
@@ -39,7 +40,7 @@ interface PendingGame {
 const pendingGames = new Map<string, PendingGame>();
 
 // Clean up expired pending games (older than 5 minutes)
-setInterval(() => {
+const pendingGamesCleanupInterval = setInterval(() => {
   const now = Date.now();
   for (const [id, game] of pendingGames) {
     if (now - game.createdAt > 5 * 60 * 1000) {
@@ -47,6 +48,8 @@ setInterval(() => {
     }
   }
 }, 60_000);
+
+pendingGamesCleanupInterval.unref();
 
 @Injectable()
 export class GameService {
@@ -333,11 +336,7 @@ export class GameService {
     const categoriesPerGame = runtimeSettings.game.categoriesPerGame;
 
     const today = new Date();
-    const seed =
-      today.getUTCFullYear() * 10000 +
-      (today.getUTCMonth() + 1) * 100 +
-      today.getUTCDate();
-    const rand = this.seededRandom(seed);
+    const rand = createDailyRandom(today);
 
     const letters = Object.keys(LETTER_CONFIG);
     const letterIdx = Math.floor(rand() * letters.length);
@@ -356,7 +355,7 @@ export class GameService {
       .distinct(true)
       .orderBy('category.id', 'ASC')
       .getMany();
-    const shuffled = [...eligible].sort(() => rand() - 0.5);
+    const shuffled = shuffleWithRandom(eligible, rand);
     const categories = shuffled.slice(0, categoriesPerGame);
 
     if (categories.length < categoriesPerGame) {
@@ -366,14 +365,6 @@ export class GameService {
     }
 
     return { letter, categories };
-  }
-
-  private seededRandom(seed: number): () => number {
-    let s = seed;
-    return () => {
-      s = (s * 16807 + 0) % 2147483647;
-      return (s - 1) / 2147483646;
-    };
   }
 
   private generateId(): string {
