@@ -644,6 +644,32 @@ React Admin dashboard
 
 ---
 
+# 15.1 Admin Session Review & Moderation
+
+Admins and moderators can review player game sessions for quality and fairness monitoring.
+
+Session moderation features:
+
+```
+list sessions with search/filter
+view full session detail and answer-level results
+show suspicious indicators (paste/bot/time anomalies)
+mark session as reviewed
+flag session for follow-up
+require reason for each review action
+write all actions to audit logs
+```
+
+Moderation policy for this phase:
+
+```
+non-destructive only
+no score invalidation
+no user sanctions
+```
+
+---
+
 # 16. Offline Mode
 
 Mobile app must support offline practice.
@@ -735,6 +761,29 @@ confidence
 
 ---
 
+## Session Moderation Reviews
+
+```
+session_moderation_reviews
+--------------------------
+id
+game_id
+reviewer_user_id
+decision (reviewed | flagged)
+reason
+metadata
+created_at
+```
+
+Notes:
+
+```
+games and game_answers remain immutable in this phase
+review records are append-only for traceability
+```
+
+---
+
 ## Categories
 
 ```
@@ -800,6 +849,23 @@ GET /leaderboard/daily
 ```
 GET /user/profile
 GET /user/stats
+```
+
+---
+
+## Admin Moderation
+
+```
+GET /admin/sessions
+GET /admin/sessions/:id
+POST /admin/sessions/:id/review
+```
+
+Review action payload:
+
+```
+decision: reviewed | flagged
+reason: required
 ```
 
 ---

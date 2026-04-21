@@ -10,7 +10,8 @@
     "web:export": "expo export --platform web",
     "web:serve": "http-server dist -p 4173 -c-1",
     "web:test:server": "npm run web:export && npm run web:serve",
-    "test:web": "playwright test"
+    "test:web": "playwright test",
+    "test:admin-web": "playwright test -c playwright.admin.config.ts"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

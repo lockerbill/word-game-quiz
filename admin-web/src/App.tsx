@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuditPage } from './pages/AuditPage';
 import { ContentPage } from './pages/ContentPage';
 import { LoginPage } from './pages/LoginPage';
+import { ModerationPage } from './pages/ModerationPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { UsersPage } from './pages/UsersPage';
 
@@ -18,13 +19,14 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/content" replace />} />
+        <Route index element={<Navigate to="/moderation" replace />} />
+        <Route path="/moderation" element={<ModerationPage />} />
         <Route path="/content" element={<ContentPage />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/audit" element={<AuditPage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/content" replace />} />
+      <Route path="*" element={<Navigate to="/moderation" replace />} />
     </Routes>
   );
 }

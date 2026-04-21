@@ -111,6 +111,10 @@ async function bootstrap() {
         'admin-settings',
         'Admin settings APIs — runtime config revisions',
       )
+      .addTag(
+        'admin-session-moderation',
+        'Admin moderation APIs — session queue and review decisions',
+      )
       .build();
 
     const document = SwaggerModule.createDocument(app, config);

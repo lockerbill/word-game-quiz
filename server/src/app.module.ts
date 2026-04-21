@@ -14,6 +14,7 @@ import { AdminModule } from './admin/admin.module.js';
 import { AdminContentModule } from './admin-content/admin-content.module.js';
 import { AdminUsersModule } from './admin-users/admin-users.module.js';
 import { AdminSettingsModule } from './admin-settings/admin-settings.module.js';
+import { AdminSessionModerationModule } from './admin-session-moderation/admin-session-moderation.module.js';
 import { User } from './entities/user.entity.js';
 import { Game } from './entities/game.entity.js';
 import { GameAnswer } from './entities/game-answer.entity.js';
@@ -23,6 +24,7 @@ import { AdminAuditLog } from './entities/admin-audit-log.entity.js';
 import { ContentImportJob } from './entities/content-import-job.entity.js';
 import { ContentRevision } from './entities/content-revision.entity.js';
 import { AdminSettingsRevision } from './entities/admin-settings-revision.entity.js';
+import { SessionModerationReview } from './entities/session-moderation-review.entity.js';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { AdminSettingsRevision } from './entities/admin-settings-revision.entity
         ContentImportJob,
         ContentRevision,
         AdminSettingsRevision,
+        SessionModerationReview,
       ],
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV === 'development',
@@ -69,6 +72,7 @@ import { AdminSettingsRevision } from './entities/admin-settings-revision.entity
     AdminContentModule,
     AdminUsersModule,
     AdminSettingsModule,
+    AdminSessionModerationModule,
     GameModule,
     LeaderboardModule,
     UserModule,

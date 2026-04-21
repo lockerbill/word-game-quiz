@@ -5,7 +5,9 @@ describe('daily-rng', () => {
     const day = new Date(Date.UTC(2026, 3, 19, 1, 0, 0));
 
     const randA = createDailyRandom(day);
-    const randB = createDailyRandom(new Date(Date.UTC(2026, 3, 19, 23, 59, 59)));
+    const randB = createDailyRandom(
+      new Date(Date.UTC(2026, 3, 19, 23, 59, 59)),
+    );
 
     const sequenceA = Array.from({ length: 5 }, () => randA());
     const sequenceB = Array.from({ length: 5 }, () => randB());

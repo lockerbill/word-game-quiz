@@ -9,7 +9,9 @@ import type { AiValidationService } from '../ai-validation/ai-validation.service
 import { GameService } from './game.service';
 
 describe('GameService daily challenge', () => {
-  const buildCategory = (id: number): Pick<Category, 'id' | 'name' | 'difficulty' | 'emoji'> => ({
+  const buildCategory = (
+    id: number,
+  ): Pick<Category, 'id' | 'name' | 'difficulty' | 'emoji'> => ({
     id,
     name: `Category ${id}`,
     difficulty: id % 2 === 0 ? 'easy' : 'medium',
@@ -37,7 +39,9 @@ describe('GameService daily challenge', () => {
   };
 
   const buildService = (categoriesPerGame = 10) => {
-    const categories = Array.from({ length: 20 }, (_, i) => buildCategory(i + 1));
+    const categories = Array.from({ length: 20 }, (_, i) =>
+      buildCategory(i + 1),
+    );
     const { repo: categoryRepo } = buildCategoryRepo(categories);
 
     const adminSettingsService = {

@@ -161,6 +161,18 @@ REQ-CONTENT-ADMIN-001 - Content expansion system + admin panel
 REQ-MODERATION-001 - Moderation pipeline for new content
 - Status: TODO
 
+REQ-ADMIN-SESSION-MODERATION-001 - Admin session review & moderation tools
+- Status: DONE
+- Scope:
+  - Moderation queue/list for played sessions with search/filter (user, mode, date, score, review status).
+  - Session detail review page showing answers, validation outcomes, and timing/suspicion indicators.
+  - Review actions limited to `reviewed` and `flagged` with required reason.
+  - Non-destructive policy for MVP: no score invalidation and no account sanctions.
+  - All moderation actions must be attributed and captured in admin audit logs.
+- Evidence:
+  - Backend: `server/src/admin-session-moderation/admin-session-moderation.controller.ts`, `server/src/admin-session-moderation/admin-session-moderation.service.ts`, `server/src/entities/session-moderation-review.entity.ts`, `server/src/database/migrations/1743877200000-add-session-moderation-reviews.ts`
+  - Admin web: `admin-web/src/pages/ModerationPage.tsx`, `admin-web/src/api/adminSessionModerationApi.ts`, `admin-web/src/types/adminSessionModeration.ts`
+
 REQ-ANALYTICS-001 - Analytics pipeline (typing speed, retention, etc.)
 - Status: TODO
 
@@ -348,6 +360,16 @@ REQ-SECURITY-001 - Additional security features (beyond JWT + throttling)
 - TODO-P4-002 - Shareable image cards
 - TODO-P4-003 - Multiplayer real-time sessions + rating system
 - TODO-P4-004 - Admin dashboard + moderation queue
+  - DONE: Add admin session moderation API endpoints (`GET /api/admin/sessions`, `GET /api/admin/sessions/:id`, `POST /api/admin/sessions/:id/review`).
+  - DONE: Add moderation metrics endpoint (`GET /api/admin/sessions/metrics`) with fixed 24h queue health KPIs.
+  - DONE: Add moderation persistence model for append-only review records (`reviewed|flagged`, reason, actor, timestamp, metadata).
+  - DONE: Build admin-web moderation queue with filters and quick triage actions.
+  - DONE: Build admin-web session detail page with answer/result timeline and suspicion signals.
+  - DONE: Wire reason-required review actions and admin audit log integration.
+  - DONE: Add backend tests for moderation controller/service.
+  - DONE: Add admin dashboard aggregate metrics cards for moderation workload/health.
+  - DONE: Add admin-web E2E flow for review/flag lifecycle (`tests/admin-web/moderation-lifecycle.spec.ts`).
+  - DONE: Add admin-web auth-guard E2E coverage for forbidden + expired sessions (`tests/admin-web/moderation-auth-guards.spec.ts`).
 - TODO-P4-005 - Analytics events + dashboards
 
 ---
